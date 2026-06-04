@@ -1,0 +1,51 @@
+﻿@model ECommerceApp.Areas.Admin.Models.ViewModels.CategoryViewModel
+@{
+    
+    ViewData["Title"] = "Edit Category";
+}
+
+<div class="card border-0 shadow-sm" style="max-width:500px;">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Category" asp-action="Edit"
+              method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-semibold"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-semibold"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ImageUrl" width="80" height="80"
+                             style="object-fit:cover;" class="rounded border" />
+                        <span class="text-muted small ms-2">Current image</span>
+                    </div>
+                }
+                <label asp-for="ImageFile" class="form-label fw-semibold">
+                    @(string.IsNullOrEmpty(Model.ImageUrl) ? "Category Image" : "Replace Image")
+                </label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                   class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScripts" />
+}

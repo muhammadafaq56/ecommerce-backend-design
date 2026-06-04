@@ -1,0 +1,53 @@
+﻿@model List<(ECommerceApp.Models.ApplicationUser User, IList<string> Roles)>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Staff Users";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Staff Users</h5>
+    <a asp-area="Admin" asp-controller="User" asp-action="Create" class="btn btn-primary btn-sm">+ Add Staff</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (user, roles) in Model)
+                {
+                    <tr>
+                        <td>@user.FirstName @user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>
+                            @foreach (var role in roles)
+                            {
+                                <span class="badge @(role == "Admin" ? "bg-danger" : "bg-primary")">@role</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.Email != "admin@shop.com")
+                            {
+                                <form asp-area="Admin" asp-controller="User" asp-action="Delete" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Delete this user?')">
+                                        Delete
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

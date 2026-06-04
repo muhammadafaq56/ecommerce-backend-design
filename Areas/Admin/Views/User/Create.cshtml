@@ -1,0 +1,66 @@
+﻿@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Create Staff User";
+}
+
+<div class="card border-0 shadow-sm" style="max-width:500px;">
+    <div class="card-header bg-white fw-semibold">New Staff User</div>
+    <div class="card-body">
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div><i class="bi bi-exclamation-circle me-1"></i>@error.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <form asp-area="Admin" asp-controller="User" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" name="firstName" class="form-control"
+                       value="@ViewBag.FirstName" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="lastName" class="form-control"
+                       value="@ViewBag.LastName" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control"
+                       value="@ViewBag.Email" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select">
+                    @foreach (var r in ViewBag.Roles)
+                    {
+                        if (r == ViewBag.SelectedRole)
+                        {
+                            <option value="@r" selected>@r</option>
+                        }
+                        else
+                        {
+                            <option value="@r">@r</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-person-plus me-1"></i>Create User
+            </button>
+            <a asp-area="Admin" asp-controller="User" asp-action="Index"
+               class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

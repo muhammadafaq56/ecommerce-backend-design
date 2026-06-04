@@ -1,0 +1,227 @@
+﻿@model List<ECommerceApp.Models.Order>
+@using ECommerceApp.Models
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<style>
+    .orders-title {
+        font-size: clamp(1.3rem, 5vw, 1.8rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    /* ── Desktop table ── */
+    .orders-table th {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #555;
+        border-bottom: 2px solid #dee2e6;
+        white-space: nowrap;
+    }
+
+    .orders-table td {
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .orders-table .btn {
+        font-size: 0.78rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+    }
+
+    /* ── Mobile card ── */
+    .order-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        margin-bottom: 0.75rem;
+        background: #fff;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    }
+
+    .order-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .order-card-number {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #212529;
+    }
+
+    .order-card-total {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #198754;
+        white-space: nowrap;
+    }
+
+    .order-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.75rem;
+        font-size: 0.78rem;
+        color: #6c757d;
+        margin-bottom: 0.65rem;
+    }
+
+    .order-card-badges {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.65rem;
+    }
+
+        .order-card-badges .badge {
+            font-size: 0.72rem;
+            padding: 0.3em 0.65em;
+            border-radius: 6px;
+        }
+
+    .order-card .btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 7px;
+        width: 100%;
+    }
+</style>
+
+<h2 class="orders-title">My Orders</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No orders yet. <a asp-controller="Shop" asp-action="Index">Start shopping</a>
+    </div>
+}
+else
+{
+    /* ── DESKTOP table (md and up) ── */
+    <div class="d-none d-md-block">
+        <table class="table table-hover orders-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Return Window</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    var deliveryDate = order.DeliveredAt ?? order.CreatedAt;
+                    var isWithinReturnWindow = order.OrderStatus == OrderStatus.Delivered && DateTime.UtcNow <= deliveryDate.AddDays(7);
+
+                    <tr>
+                        <td>@order.OrderNumber</td>
+                        <td>@order.CreatedAt.ToShortDateString()</td>
+                        <td>@order.Items.Count</td>
+                        <td>$@order.Total</td>
+                        <td>
+                            <span class="badge @GetStatusBadgeClass(order.OrderStatus)">
+                                @order.OrderStatus
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-@(order.PaymentStatus == PaymentStatus.Paid ? "success" : order.PaymentStatus == PaymentStatus.Refunded ? "info" : "warning")">
+                                @order.PaymentStatus
+                            </span>
+                        </td>
+                        <td>
+                            @if (order.OrderStatus == OrderStatus.ReturnProcessing)
+                            {
+                                <span class="text-warning small fw-semibold">Reviewing Request</span>
+                            }
+                            else if (order.OrderStatus == OrderStatus.Delivered)
+                            {
+                                if (isWithinReturnWindow)
+                                {
+                                    <span class="text-success small">Active (Ends @deliveryDate.AddDays(7).ToShortDateString())</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Closed (7+ Days Passed)</span>
+                                }
+                            }
+                            else if (order.OrderStatus == OrderStatus.Cancelled)
+                            {
+                                <span class="text-danger small">—</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Available post-delivery</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Detail" asp-route-id="@order.Id"
+                               class="btn btn-outline-dark btn-sm">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    /* ── MOBILE cards (below md) ── */
+    <div class="d-md-none">
+        @foreach (var order in Model)
+        {
+            var deliveryDate = order.DeliveredAt ?? order.CreatedAt;
+            var isWithinReturnWindow = order.OrderStatus == OrderStatus.Delivered && DateTime.UtcNow <= deliveryDate.AddDays(7);
+
+            <div class="order-card">
+                <div class="order-card-top">
+                    <span class="order-card-number">#@order.OrderNumber</span>
+                    <span class="order-card-total">$@order.Total</span>
+                </div>
+                <div class="order-card-meta">
+                    <span>📅 @order.CreatedAt.ToShortDateString()</span>
+                    <span>🛍 @order.Items.Count item@(order.Items.Count == 1 ? "" : "s")</span>
+                </div>
+                <div class="order-card-badges">
+                    <span class="badge @GetStatusBadgeClass(order.OrderStatus)">@order.OrderStatus</span>
+
+                    <span class="badge bg-@(order.PaymentStatus == PaymentStatus.Paid ? "success" : order.PaymentStatus == PaymentStatus.Refunded ? "info" : "warning")">
+                        @order.PaymentStatus
+                    </span>
+
+                    @if (order.OrderStatus == OrderStatus.Delivered && !isWithinReturnWindow)
+                    {
+                        <span class="badge bg-light text-muted">Return Window Closed</span>
+                    }
+                    else if (order.OrderStatus == OrderStatus.ReturnProcessing)
+                    {
+                        <span class="badge bg-warning text-dark">Processing Request</span>
+                    }
+                </div>
+                <a asp-action="Detail" asp-route-id="@order.Id"
+                   class="btn btn-outline-dark">View Details</a>
+            </div>
+        }
+    </div>
+}
+
+@functions {
+    string GetStatusBadgeClass(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "bg-warning text-dark",
+        OrderStatus.Processing => "bg-info text-dark",
+        OrderStatus.Shipped => "bg-primary",
+        OrderStatus.Delivered => "bg-success",
+        OrderStatus.ReturnProcessing => "bg-warning text-dark border border-dark",
+        OrderStatus.Cancelled => "bg-danger",
+        _ => "bg-secondary"
+    };
+}

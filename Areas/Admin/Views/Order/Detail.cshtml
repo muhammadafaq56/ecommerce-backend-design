@@ -1,0 +1,302 @@
+﻿@model ECommerceApp.Models.Order
+@using ECommerceApp.Models
+@{
+    ViewData["Title"] = $"Order #{Model.OrderNumber}";
+
+    var successMsg = TempData["Success"]?.ToString();
+    var errorMsg = TempData["Error"]?.ToString();
+
+    // Allowed next statuses based on current state
+    // Delivered is intentionally excluded — only changes via customer return request
+    var allowedTransitions = Model.OrderStatus switch
+    {
+        OrderStatus.Processing => new[] { "Shipped", "Cancelled" },
+        OrderStatus.Shipped => new[] { "Delivered", "Cancelled" },
+        _ => Array.Empty<string>()
+    };
+
+    bool isLocked = Model.OrderStatus == OrderStatus.Cancelled
+                        || Model.OrderStatus == OrderStatus.Delivered
+                        || Model.OrderStatus == OrderStatus.ReturnProcessing;
+
+    bool isReturnPending = Model.OrderStatus == OrderStatus.ReturnProcessing;
+}
+
+<div class="mb-3">
+    <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+       class="btn btn-sm btn-outline-secondary">← Back to Orders</a>
+</div>
+
+@* ── Error alert ── *@
+@if (errorMsg != null)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>@errorMsg</span>
+    </div>
+}
+
+@* ── Return / Cancellation Request Banner ── *@
+@if (isReturnPending)
+{
+    <div class="card border-warning mb-4 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h5 class="fw-bold text-warning mb-1">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>Action Required: Cancellation / Return Request
+                </h5>
+                <p class="mb-0 text-muted small">
+                    The customer has filed a request. Approve to cancel and refund, or reject to restore the previous order state.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                @* Approve = Cancelled + auto-refund *@
+                <form asp-area="Admin" asp-controller="Order" asp-action="UpdateStatus"
+                      asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="status" value="Cancelled" />
+                    <button type="submit" class="btn btn-sm btn-success fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Approve &amp; Refund
+                    </button>
+                </form>
+                @* Reject = restore PreviousStatus *@
+                <form asp-area="Admin" asp-controller="Order" asp-action="RejectReturn"
+                      asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-x-circle me-1"></i> Reject Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@* ── Cancelled lock notice ── *@
+@if (Model.OrderStatus == OrderStatus.Cancelled)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="bi bi-lock-fill"></i>
+        <span>This order has been <strong>cancelled and refunded</strong>. No further changes are possible.</span>
+    </div>
+}
+
+@* ── Delivered lock notice ── *@
+@if (Model.OrderStatus == OrderStatus.Delivered)
+{
+    <div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>This order has been <strong>delivered</strong>. Status can only change if the customer submits a return/cancellation request.</span>
+    </div>
+}
+
+<div class="row g-4">
+
+    @* ── Left column: items table ── *@
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">Order Items</div>
+            <div class="card-body p-0">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@item.ProductName</div>
+                                    @if (item.Product?.ImageUrl != null)
+                                    {
+                                        <img src="@item.Product.ImageUrl" width="36" height="36"
+                                             style="object-fit:cover;" class="rounded mt-1" />
+                                    }
+                                </td>
+                                <td>$@item.UnitPrice.ToString("N2")</td>
+                                <td>@item.Quantity</td>
+                                <td>$@item.Total.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="text-end fw-semibold">Subtotal</td>
+                            <td>$@Model.SubTotal.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end fw-semibold">Shipping</td>
+                            <td>$@Model.ShippingCost.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end fw-semibold">Tax</td>
+                            <td>$@Model.Tax.ToString("N2")</td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">Total</td>
+                            <td>$@Model.Total.ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* ── Right column: info + status update ── *@
+    <div class="col-lg-4 d-flex flex-column gap-3">
+
+        @* Order Info *@
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">Order Info</div>
+            <div class="card-body">
+                <dl class="row mb-0 small">
+                    <dt class="col-5">Order #</dt>
+                    <dd class="col-7 fw-semibold">@Model.OrderNumber</dd>
+
+                    <dt class="col-5">Date</dt>
+                    <dd class="col-7">@Model.CreatedAt.ToString("MMM d, yyyy HH:mm")</dd>
+
+                    <dt class="col-5">Status</dt>
+                    <dd class="col-7">
+                        <span class="badge @GetStatusBadge(Model.OrderStatus)">@Model.OrderStatus</span>
+                    </dd>
+
+                    <dt class="col-5">Payment</dt>
+                    <dd class="col-7">
+                        <span class="badge @GetPaymentBadge(Model.PaymentStatus)">@Model.PaymentStatus</span>
+                    </dd>
+
+                    @if (Model.StripePaymentIntentId != null)
+                    {
+                        <dt class="col-5">Stripe ID</dt>
+                        <dd class="col-7 text-muted" style="word-break:break-all;">
+                            @Model.StripePaymentIntentId
+                        </dd>
+                    }
+
+                    @if (Model.DeliveredAt.HasValue)
+                    {
+                        <dt class="col-5">Delivered</dt>
+                        <dd class="col-7">@Model.DeliveredAt.Value.ToString("MMM d, yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @* Customer *@
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">Customer</div>
+            <div class="card-body small">
+                <div class="fw-semibold">@Model.CustomerName</div>
+                <div class="text-muted">@Model.CustomerEmail</div>
+                <hr class="my-2" />
+                <div>@Model.ShippingAddress</div>
+                <div>@Model.ShippingCity, @Model.ShippingPostalCode</div>
+                <div>@Model.ShippingCountry</div>
+            </div>
+        </div>
+
+        @* Status Update — only shown when transitions are available *@
+        @if (!isLocked && allowedTransitions.Length > 0)
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Update Order Status</div>
+                <div class="card-body">
+                    <form asp-area="Admin" asp-controller="Order" asp-action="UpdateStatus"
+                          asp-route-id="@Model.Id" method="post" class="d-flex flex-column gap-2">
+                        @Html.AntiForgeryToken()
+                        <div>
+                            <label class="small text-muted mb-1">Change status to:</label>
+                            <select name="status" class="form-select form-select-sm">
+                                @foreach (var s in allowedTransitions)
+                                {
+                                    <option value="@s">
+                                        @s@(s == "Cancelled" ? " (auto-refund)" : "")
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-1">Apply</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@* ── Success modal ── *@
+@if (successMsg != null)
+{
+    <div class="modal fade" id="statusSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center py-4 px-4">
+                    <div class="mb-3">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="32" cy="32" r="32" fill="#d1fae5" />
+                            <path d="M18 33l10 10 18-20" stroke="#059669" stroke-width="3.5"
+                                  stroke-linecap="round" stroke-linejoin="round"
+                                  style="stroke-dasharray:50;stroke-dashoffset:50;
+                                             animation:drawCheck .45s ease forwards .15s" />
+                        </svg>
+                    </div>
+                    <h5 class="fw-bold mb-1">Done</h5>
+                    <p class="text-muted mb-3">@successMsg</p>
+                    <button type="button" class="btn btn-success px-4"
+                            data-bs-dismiss="modal">
+                        Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <style>
+        @@keyframes drawCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (successMsg != null)
+            {
+                    <text>
+                    var el = document.getElementById('statusSuccessModal');
+                    if (el) new bootstrap.Modal(el).show();
+                    </text>
+            }
+        });
+    </script>
+}
+
+@functions {
+    string GetStatusBadge(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "bg-warning text-dark",
+        OrderStatus.Processing => "bg-info text-dark",
+        OrderStatus.Shipped => "bg-primary",
+        OrderStatus.Delivered => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.ReturnProcessing => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+
+    string GetPaymentBadge(PaymentStatus p) => p switch
+    {
+        PaymentStatus.Paid => "bg-success",
+        PaymentStatus.Refunded => "bg-info text-dark",
+        PaymentStatus.Failed => "bg-danger",
+        _ => "bg-warning text-dark"
+    };
+}

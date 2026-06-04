@@ -1,0 +1,78 @@
+﻿@model IEnumerable<ECommerceApp.Models.ContactMessage>
+@{
+    ViewData["Title"] = "Contact Messages";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0 fw-bold">📬 Contact Messages</h4>
+        <small class="text-muted">
+            @Model.Count() total ·
+            @Model.Count(m => !m.IsReplied) unreplied
+        </small>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        No messages yet.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Received</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var msg in Model)
+                    {
+                        <tr class="@(!msg.IsReplied ? "table-warning" : "")">
+                            <td>
+                                @if (msg.IsReplied)
+                                {
+                                    <span class="badge bg-success">Replied</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Pending</span>
+                                }
+                            </td>
+                            <td class="fw-semibold">@msg.Name</td>
+                            <td class="text-muted small">@msg.Email</td>
+                            <td>@msg.Subject</td>
+                            <td class="text-muted small">
+                                @msg.SentAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Detail" asp-route-id="@msg.Id"
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@msg.Id"
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete this message?')">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

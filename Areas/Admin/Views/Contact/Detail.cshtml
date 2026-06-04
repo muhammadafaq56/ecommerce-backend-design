@@ -1,0 +1,149 @@
+﻿@model ECommerceApp.Models.ContactMessage
+@{
+    ViewData["Title"] = $"Message from {Model.Name}";
+}
+
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Messages
+    </a>
+</div>
+
+<div class="row g-4">
+
+    <!-- Message Card -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-bold border-bottom py-3">
+                <i class="bi bi-envelope-open me-2 text-primary"></i>
+                Customer Message
+            </div>
+            <div class="card-body">
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-3 text-muted">From</dt>
+                    <dd class="col-sm-9 fw-semibold">@Model.Name</dd>
+
+                    <dt class="col-sm-3 text-muted">Email</dt>
+                    <dd class="col-sm-9">
+                        <a href="mailto:@Model.Email">@Model.Email</a>
+                    </dd>
+
+                    <dt class="col-sm-3 text-muted">Subject</dt>
+                    <dd class="col-sm-9">@Model.Subject</dd>
+
+                    <dt class="col-sm-3 text-muted">Received</dt>
+                    <dd class="col-sm-9 text-muted small">
+                        @Model.SentAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                    </dd>
+
+                    <dt class="col-sm-3 text-muted">Status</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.IsReplied)
+                        {
+                            <span class="badge bg-success">Replied on @Model.RepliedAt?.ToLocalTime().ToString("dd MMM yyyy")</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Pending Reply</span>
+                        }
+                    </dd>
+                </dl>
+
+                <hr />
+
+                <h6 class="text-muted text-uppercase small mb-2">Message</h6>
+                <div class="bg-light rounded p-3" style="white-space:pre-wrap;font-size:.93rem;">@Model.Message</div>
+
+                @if (Model.IsReplied && !string.IsNullOrEmpty(Model.ReplyText))
+                {
+                    <hr />
+                    <h6 class="text-muted text-uppercase small mb-2">Your Previous Reply</h6>
+                    <div class="bg-success bg-opacity-10 border border-success rounded p-3"
+                         style="white-space:pre-wrap;font-size:.93rem;">
+                        @Model.ReplyText
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Reply Card -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold border-bottom py-3">
+                <i class="bi bi-reply me-2 text-warning"></i>
+                Send Reply
+            </div>
+            <div class="card-body">
+
+                @if (Model.IsReplied)
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i>
+                        You've already replied to this message. You can send another reply below.
+                    </div>
+                }
+
+                <form asp-action="Reply" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">To</label>
+                        <input class="form-control" value="@Model.Name &lt;@Model.Email&gt;" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject</label>
+                        <input class="form-control" value="Re: @Model.Subject" readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Reply Message <span class="text-danger">*</span></label>
+                        <textarea name="replyText" class="form-control" rows="7"
+                                  placeholder="Type your reply here…" required></textarea>
+                    </div>
+
+                    <!-- Confirm Modal Trigger -->
+                    <button type="button" class="btn btn-warning w-100 fw-semibold"
+                            onclick="showConfirm()">
+                        <i class="bi bi-send me-2"></i> Send Reply
+                    </button>
+
+                    <!-- Confirm Dialog -->
+                    <div id="confirm-box" class="mt-3 p-3 bg-light border rounded" style="display:none;">
+                        <p class="mb-2 fw-semibold">
+                            <i class="bi bi-question-circle text-warning me-1"></i>
+                            Send this reply to <strong>@Model.Email</strong>?
+                        </p>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success flex-grow-1">
+                                <i class="bi bi-check-lg me-1"></i> Okay, Send It
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary"
+                                    onclick="hideConfirm()">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function showConfirm() {
+            const reply = document.querySelector('textarea[name="replyText"]').value.trim();
+            if (!reply) { alert('Please write a reply before sending.'); return; }
+            document.getElementById('confirm-box').style.display = 'block';
+        }
+        function hideConfirm() {
+            document.getElementById('confirm-box').style.display = 'none';
+        }
+    </script>
+}

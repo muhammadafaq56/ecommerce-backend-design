@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Admin — @ViewData["Title"]</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+
+    <style>
+
+        body {
+            overflow-x: hidden;
+        }
+
+        #sidebar {
+            min-width: 240px;
+            min-height: 100vh;
+            background: #212529;
+        }
+
+            #sidebar .nav-link {
+                color: rgba(255,255,255,.75);
+                border-radius: 8px;
+                padding: 10px 14px;
+                transition: 0.2s;
+            }
+
+                #sidebar .nav-link:hover,
+                #sidebar .nav-link.active {
+                    color: #fff;
+                    background: rgba(255,255,255,.1);
+                }
+
+        .page-content {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="d-flex">
+
+        <!-- SIDEBAR -->
+        <nav id="sidebar"
+             class="p-3 d-flex flex-column">
+
+            <!-- LOGO -->
+            <div class="text-white fw-bold fs-4 mb-4 px-2">
+                <i class="bi bi-shop-window me-2"></i>
+                Afaq Mart Admin
+            </div>
+
+            <!-- DASHBOARD -->
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="nav-link mb-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
+                   asp-area="Admin"
+                   asp-controller="Dashboard"
+                   asp-action="Index">
+
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Dashboard
+                </a>
+            }
+
+            <!-- PRODUCTS -->
+            @if (User.IsInRole("Admin") ||
+                        User.IsInRole("ProductManager"))
+            {
+                <a class="nav-link mb-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")"
+                   asp-area="Admin"
+                   asp-controller="Product"
+                   asp-action="Index">
+
+                    <i class="bi bi-box-seam me-2"></i>
+                    Products
+                </a>
+            }
+
+            <!-- CATEGORIES -->
+            @if (User.IsInRole("Admin") ||
+                        User.IsInRole("CategoryManager"))
+            {
+                <a class="nav-link mb-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active" : "")"
+                   asp-area="Admin"
+                   asp-controller="Category"
+                   asp-action="Index">
+
+                    <i class="bi bi-tags me-2"></i>
+                    Categories
+                </a>
+            }
+
+            <!-- ORDERS -->
+            @if (User.IsInRole("Admin") ||
+                        User.IsInRole("OrderManager"))
+            {
+                <a class="nav-link mb-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Order" ? "active" : "")"
+                   asp-area="Admin"
+                   asp-controller="Order"
+                   asp-action="Index">
+
+                    <i class="bi bi-receipt me-2"></i>
+                    Orders
+                </a>
+            }
+
+            <!-- STAFF USERS -->
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="nav-link mb-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")"
+                   asp-area="Admin"
+                   asp-controller="User"
+                   asp-action="Index">
+
+                    <i class="bi bi-people me-2"></i>
+                    Staff Users
+                </a>
+            }
+
+            <!-- CONTACT MESSAGES -->
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="nav-link mb-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contact" ? "active" : "")"
+                   asp-area="Admin"
+                   asp-controller="Contact"
+                   asp-action="Index">
+                    <i class="bi bi-chat-left-text me-2"></i>
+                    Messages
+                    @{
+                        // Unread badge — injected via ViewBag from a base controller or _Layout
+                        var unread = ViewBag.UnreadMessages as int?;
+                        if (unread.HasValue && unread.Value > 0)
+                        {
+                            <span class="badge bg-danger ms-1">@unread</span>
+                        }
+                    }
+                </a>
+            }
+
+            <!-- BOTTOM -->
+            <div class="mt-auto pt-4 border-top border-secondary">
+
+                <div class="text-white-50 small mb-3 px-2">
+                    Logged in as
+                    <strong class="text-white">
+                        @User.Identity?.Name
+                    </strong>
+                </div>
+
+                <form asp-area=""
+                      asp-controller="Account"
+                      asp-action="Logout"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn btn-danger w-100">
+
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Logout
+                    </button>
+                </form>
+
+            </div>
+
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-grow-1 page-content">
+
+            <!-- TOPBAR -->
+            <div class="topbar px-4 py-3">
+
+                <h5 class="mb-0 text-secondary">
+                    @ViewData["Title"]
+                </h5>
+
+            </div>
+
+            <!-- PAGE CONTENT -->
+            <div class="p-4">
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show">
+
+                        <i class="bi bi-check-circle me-2"></i>
+
+                        @TempData["Success"]
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert">
+                        </button>
+
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show">
+
+                        <i class="bi bi-exclamation-circle me-2"></i>
+
+                        @TempData["Error"]
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert">
+                        </button>
+
+                    </div>
+                }
+
+                @RenderBody()
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
