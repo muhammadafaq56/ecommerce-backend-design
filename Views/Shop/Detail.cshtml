@@ -1,0 +1,751 @@
+@model ECommerceApp.Models.Product
+@using ECommerceApp.Models
+@{
+    ViewData["Title"] = Model.Name;
+    ViewData["MetaDescription"] = Model.Description?.Length > 155 ? Model.Description.Substring(0, 152) + "..." : (Model.Description ?? Model.Name + " – available at Afaq Mart.");
+    ViewData["OgImage"] = Model.ImageUrl;
+
+    // Aggregate rating counts directly through the model navigation property relationship
+    var totalReviews = Model.Reviews?.Count ?? 0;
+    var averageRating = totalReviews > 0 ? Model.Reviews.Average(r => r.Rating) : 0.0;
+}
+
+<script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "Product",
+      "name": "@Html.Raw(Model.Name.Replace("\"", "\\\""))",
+      "image": "@Model.ImageUrl",
+      "description": "@Html.Raw((Model.Description ?? "").Replace("\"", "\\\"").Replace("\n", " "))",
+      "brand": { "@@type": "Brand", "name": "@Model.Brand" },
+      "sku": "@Model.Id",
+      "offers": {
+        "@@type": "Offer",
+        "url": "https://afaqmart.com/Shop/Detail/@Model.Id",
+        "priceCurrency": "USD",
+        "price": "@Model.Price",
+        "availability": "@(Model.StockQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")",
+        "seller": { "@@type": "Organization", "name": "Afaq Mart" }
+      },
+      "aggregateRating": {
+        "@@type": "AggregateRating",
+        "ratingValue": "@averageRating.ToString("0.0")",
+        "reviewCount": "@totalReviews"
+      }
+    }
+</script>
+
+<style>
+    /* ── BREADCRUMB ── */
+    .am-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+        color: var(--am-muted);
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+        .am-breadcrumb a {
+            color: var(--am-muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+            .am-breadcrumb a:hover {
+                color: var(--am-ink);
+            }
+
+        .am-breadcrumb .sep {
+            color: #ccc;
+        }
+
+        .am-breadcrumb .current {
+            color: var(--am-ink);
+            font-weight: 500;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    /* ── DETAIL LAYOUT ── */
+    .am-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        gap: 2.5rem;
+        align-items: start;
+        margin-bottom: 3.5rem;
+    }
+
+    @@media (max-width: 767px) {
+        .am-detail-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    /* ── IMAGE ── */
+    .am-detail-img {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: clamp(240px, 45vw, 380px);
+        overflow: hidden;
+        position: relative;
+    }
+
+        .am-detail-img img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            padding: 1.5rem;
+        }
+
+    .am-detail-img-placeholder {
+        font-size: 6rem;
+        color: #d0cdc6;
+    }
+
+    .am-detail-sale-badge {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        background: var(--am-red);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    /* ── INFO PANEL ── */
+    .am-detail-category {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--am-accent);
+        margin-bottom: 0.4rem;
+    }
+
+    .am-detail-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.4rem, 4.5vw, 2rem);
+        font-weight: 800;
+        line-height: 1.18;
+        color: var(--am-ink);
+        margin-bottom: 0.5rem;
+    }
+
+    .am-detail-brand {
+        font-size: 0.85rem;
+        color: var(--am-muted);
+        margin-bottom: 0.75rem;
+    }
+
+        .am-detail-brand strong {
+            color: var(--am-ink);
+        }
+
+    /* Rating */
+    .am-detail-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--am-page);
+        border-radius: var(--am-radius);
+        padding: 0.5rem 0.85rem;
+        margin-bottom: 1.25rem;
+        width: fit-content;
+    }
+
+    .am-detail-stars {
+        color: #ffc107;
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+    }
+
+        .am-detail-stars .empty-star {
+            color: #e4e5e9;
+        }
+
+    .am-detail-rating-val {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .am-detail-review-count {
+        font-size: 0.8rem;
+        color: var(--am-muted);
+    }
+
+    .am-detail-review-link {
+        text-decoration: none;
+        color: var(--am-accent);
+        font-weight: 600;
+        transition: opacity 0.15s;
+    }
+
+        .am-detail-review-link:hover {
+            opacity: 0.85;
+            text-decoration: underline;
+        }
+
+    /* Price */
+    .am-detail-price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .am-detail-price {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+        font-weight: 700;
+        color: var(--am-green);
+        line-height: 1;
+    }
+
+    .am-detail-orig {
+        font-size: 1rem;
+        color: var(--am-muted);
+        text-decoration: line-through;
+    }
+
+    .am-detail-save {
+        background: #fde8e8;
+        color: var(--am-red);
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    /* Stock */
+    .am-detail-stock {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: var(--am-radius);
+        width: fit-content;
+    }
+
+        .am-detail-stock.in-stock {
+            background: #e8f5ee;
+            color: var(--am-green);
+        }
+
+        .am-detail-stock.out-stock {
+            background: #fde8e8;
+            color: var(--am-red);
+        }
+
+    /* Description */
+    .am-detail-desc {
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.7;
+        border-top: 1px solid var(--am-border);
+        padding-top: 1.1rem;
+        margin-top: 1rem;
+        margin-bottom: 1.35rem;
+    }
+
+    /* Add to cart form */
+    .am-atc-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .am-qty-wrap {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-radius);
+        overflow: hidden;
+        background: var(--am-surface);
+    }
+
+    .am-qty-btn {
+        background: none;
+        border: none;
+        width: 36px;
+        height: 44px;
+        font-size: 1rem;
+        cursor: pointer;
+        color: var(--am-muted);
+        transition: background 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .am-qty-btn:hover {
+            background: var(--am-page);
+            color: var(--am-ink);
+        }
+
+    .am-qty-input {
+        width: 48px;
+        height: 44px;
+        border: none;
+        text-align: center;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: transparent;
+        color: var(--am-ink);
+        -moz-appearance: textfield;
+    }
+
+        .am-qty-input::-webkit-outer-spin-button,
+        .am-qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .am-qty-input:focus {
+            outline: none;
+        }
+
+    .am-atc-btn {
+        flex: 1;
+        min-width: 160px;
+        background: var(--am-ink);
+        color: #fff;
+        border: none;
+        border-radius: var(--am-radius);
+        padding: 0.7rem 1.5rem;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: opacity 0.18s;
+    }
+
+        .am-atc-btn:hover {
+            opacity: 0.86;
+        }
+
+        .am-atc-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+    /* Interactive Review Section */
+    .am-review-submission-box {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--am-border);
+    }
+
+    .am-review-card {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-radius-lg);
+        padding: 1.25rem;
+    }
+
+    .am-review-card-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--am-ink);
+        margin-bottom: 0.75rem;
+    }
+
+    .am-star-input-row {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 0.3rem;
+        margin-bottom: 0.75rem;
+    }
+
+        .am-star-input-row input {
+            display: none;
+        }
+
+        .am-star-input-row label {
+            font-size: 1.4rem;
+            color: #e4e5e9;
+            cursor: pointer;
+            transition: color 0.1s;
+        }
+
+            .am-star-input-row input:checked ~ label,
+            .am-star-input-row label:hover,
+            .am-star-input-row label:hover ~ label {
+                color: #ffc107;
+            }
+
+    /* ── RELATED PRODUCTS ── */
+    .am-related-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+        font-weight: 700;
+        margin-bottom: 1.1rem;
+    }
+
+    .am-related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+        gap: 14px;
+    }
+
+    @@media (max-width: 575px) {
+        .am-related-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .am-rel-card {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-radius-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+        .am-rel-card:hover {
+            box-shadow: var(--am-shadow-lg);
+            transform: translateY(-2px);
+        }
+
+    .am-rel-img {
+        height: 130px;
+        background: var(--am-page);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid var(--am-border);
+        font-size: 2.5rem;
+        color: #ccc;
+    }
+
+        .am-rel-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
+        }
+
+    .am-rel-body {
+        padding: 0.8rem 0.85rem;
+        flex: 1;
+    }
+
+    .am-rel-name {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--am-ink);
+        margin-bottom: 5px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+    }
+
+    .am-rel-price {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--am-green);
+    }
+
+    .am-rel-footer {
+        padding: 0.5rem 0.7rem 0.7rem;
+    }
+</style>
+
+<nav aria-label="breadcrumb">
+    <div class="am-breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a>
+        <span class="sep" aria-hidden="true">›</span>
+        <a asp-controller="Shop" asp-action="Index">Shop</a>
+        <span class="sep" aria-hidden="true">›</span>
+        @if (Model.Category != null)
+        {
+            <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="@Model.CategoryId">@Model.Category.Name</a>
+            <span class="sep" aria-hidden="true">›</span>
+        }
+        <span class="current" aria-current="page">@Model.Name</span>
+    </div>
+</nav>
+
+@* ── SINGLE SYSTEM EXCLUSIVE ALERT BLOCK PLACED DIRECTLY BENEATH BREADCRUMBS ── *@
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show small py-2 mb-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close shadow-none small" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show small py-2 mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close shadow-none small" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="am-detail-grid">
+    <div>
+        <div class="am-detail-img">
+            @if (Model.OriginalPrice.HasValue)
+            {
+                <div class="am-detail-sale-badge">SALE – Save @Model.DiscountPercentage%</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Name" itemprop="image" />
+            }
+            else
+            {
+                <span class="am-detail-img-placeholder" aria-hidden="true">📦</span>
+            }
+        </div>
+    </div>
+
+    <div class="am-detail-info">
+        @if (Model.Category != null)
+        {
+            <p class="am-detail-category">@Model.Category.Name</p>
+        }
+
+        <h1 class="am-detail-title" itemprop="name">@Model.Name</h1>
+        <p class="am-detail-brand">By <strong itemprop="brand">@Model.Brand</strong></p>
+
+        <div class="am-detail-rating" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+            <meta itemprop="ratingValue" content="@averageRating.ToString("0.0")" />
+            <meta itemprop="reviewCount" content="@totalReviews" />
+            <span class="am-detail-stars" aria-label="@averageRating.ToString("0.0") out of 5">
+                @for (int s = 1; s <= 5; s++)
+                {
+                    @(s <= (int)Math.Round(averageRating) ? "★" : "☆")
+                }
+            </span>
+            <span class="am-detail-rating-val">@averageRating.ToString("0.0")</span>
+            <span class="am-detail-review-count">
+                <a asp-controller="Shop" asp-action="Reviews" asp-route-id="@Model.Id" class="am-detail-review-link">
+                    (See all @totalReviews reviews)
+                </a>
+            </span>
+        </div>
+
+        <div class="am-detail-price-row" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            <meta itemprop="priceCurrency" content="USD" />
+            <meta itemprop="price" content="@Model.Price" />
+            <meta itemprop="availability" content="@(Model.StockQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")" />
+            <span class="am-detail-price">$@Model.Price</span>
+            @if (Model.OriginalPrice.HasValue)
+            {
+                <span class="am-detail-orig">$@Model.OriginalPrice</span>
+                <span class="am-detail-save">Save @Model.DiscountPercentage%</span>
+            }
+        </div>
+
+        @if (Model.StockQuantity > 0)
+        {
+            <div class="am-detail-stock in-stock" role="status">
+                <i class="bi bi-check-circle-fill"></i>
+                In Stock &mdash; @Model.StockQuantity available
+            </div>
+        }
+        else
+        {
+            <div class="am-detail-stock out-stock" role="status">
+                <i class="bi bi-x-circle-fill"></i>
+                Out of Stock
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="am-detail-desc" itemprop="description">@Model.Description</p>
+        }
+
+        @if (Model.StockQuantity > 0)
+        {
+            <div class="am-atc-form">
+                <div class="am-qty-wrap" role="group" aria-label="Quantity">
+                    <button class="am-qty-btn" id="qty-minus" type="button" aria-label="Decrease quantity">−</button>
+                    <input type="number" id="qty-input"
+                           value="1" min="1" max="@Model.StockQuantity"
+                           class="am-qty-input"
+                           aria-label="Quantity" />
+                    <button class="am-qty-btn" id="qty-plus" type="button" aria-label="Increase quantity">+</button>
+                </div>
+                <button id="btn-add-detail" class="am-atc-btn"
+                        data-product-id="@Model.Id"
+                        data-max="@Model.StockQuantity"
+                        aria-label="Add @Model.Name to cart">
+                    <i class="bi bi-bag-plus"></i> Add to Cart
+                </button>
+            </div>
+            <small class="text-muted mt-2 d-block" style="font-size:0.78rem;">
+                Max quantity per order: @Model.StockQuantity
+            </small>
+        }
+        else
+        {
+            <button class="am-atc-btn" disabled style="max-width:240px;">
+                <i class="bi bi-x-circle"></i> Out of Stock
+            </button>
+        }
+
+        <div class="am-review-submission-box">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <div class="am-review-card shadow-sm">
+                    <div class="am-review-card-title">
+                        <i class="bi bi-chat-left-heart me-1"></i> Write a Product Review
+                    </div>
+                    <form asp-controller="Shop" asp-action="SubmitReview" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="productId" value="@Model.Id" />
+
+                        <div class="mb-2">
+                            <div class="am-star-input-row">
+                                <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" class="bi bi-star-fill"> ★</label>
+                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="bi bi-star-fill"> ★</label>
+                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="bi bi-star-fill"> ★</label>
+                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="bi bi-star-fill"> ★</label>
+                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="bi bi-star-fill"> ★</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <textarea name="reviewText" rows="2" class="form-control form-control-sm shadow-none"
+                                  placeholder="Share your experience with this item..." required style="font-size:0.85rem; border-radius:6px;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-sm btn-dark w-100 fw-semibold py-2" style="border-radius:6px; font-size:0.82rem;">
+                            Submit Review & Rating
+                        </button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="alert bg-light border text-center py-2 px-3 m-0" style="border-radius:var(--am-radius);">
+                    <small class="text-muted">
+                        <i class="bi bi-lock-fill me-1 text-warning"></i>
+                        Please <a asp-controller="Account" asp-action="Login" class="text-dark fw-bold text-decoration-none">Sign In</a> to review this product.
+                    </small>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+@{
+    var related = ViewBag.RelatedProducts as List<ECommerceApp.Models.Product>;
+}
+@if (related != null && related.Any())
+{
+    <section aria-labelledby="related-heading">
+        <h2 class="am-related-title" id="related-heading">You Might Also Like</h2>
+        <div class="am-related-grid">
+            @foreach (var p in related)
+            {
+                <div class="am-rel-card">
+                    <div class="am-rel-img">
+                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                        {
+                            <img src="@p.ImageUrl" alt="@p.Name" loading="lazy" />
+                        }
+                        else
+                        {
+                            <span aria-hidden="true">📦</span>
+                        }
+                    </div>
+                    <div class="am-rel-body">
+                        <p class="am-rel-name">@p.Name</p>
+                        <p class="am-rel-price">$@p.Price</p>
+                    </div>
+                    <div class="am-rel-footer">
+                        <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                           class="btn btn-outline-dark btn-sm w-100">View Product</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script>
+        var qtyInput  = document.getElementById('qty-input');
+        var qtyMinus  = document.getElementById('qty-minus');
+        var qtyPlus   = document.getElementById('qty-plus');
+        var btn       = document.getElementById('btn-add-detail');
+        var maxStock  = parseInt(btn ? btn.dataset.max : 1);
+
+        function clampQty(val) {
+            if (isNaN(val) || val < 1) return 1;
+            if (val > maxStock)        return maxStock;
+            return val;
+        }
+
+        if (qtyInput) {
+            qtyInput.addEventListener('input', function () { this.value = clampQty(parseInt(this.value)); });
+        }
+        if (qtyMinus) {
+            qtyMinus.addEventListener('click', function () { qtyInput.value = clampQty(parseInt(qtyInput.value) - 1); });
+        }
+        if (qtyPlus) {
+            qtyPlus.addEventListener('click', function () { qtyInput.value = clampQty(parseInt(qtyInput.value) + 1); });
+        }
+
+        if (btn) {
+            btn.addEventListener('click', async function () {
+                var quantity  = clampQty(parseInt(qtyInput.value));
+                var productId = this.dataset.productId;
+
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Adding...';
+
+                try {
+                    var res  = await fetch('/Cart/Add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body:    'productId=' + productId + '&quantity=' + quantity
+                    });
+                    var data = await res.json();
+
+                    if (data.success) {
+                        if (window.setCartBadge) window.setCartBadge(data.count || 0);
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Could not add to cart.');
+                        this.disabled = false;
+                        this.innerHTML = '<i class="bi bi-bag-plus"></i> Add to Cart';
+                    }
+                } catch (e) {
+                    alert('Something went wrong. Please try again.');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-bag-plus"></i> Add to Cart';
+                }
+            });
+        }
+    </script>
+}

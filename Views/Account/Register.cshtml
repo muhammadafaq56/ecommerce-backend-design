@@ -1,0 +1,150 @@
+﻿@model ECommerceApp.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+<style>
+    .auth-wrapper {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    .auth-card {
+        width: 100%;
+        max-width: 520px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        padding: clamp(1.5rem, 6vw, 2.5rem);
+    }
+    .auth-card h2 {
+        font-size: clamp(1.4rem, 5vw, 1.8rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    .auth-card .form-control {
+        font-size: clamp(0.9rem, 3vw, 1rem);
+        padding: 0.6rem 0.85rem;
+        border-radius: 8px;
+    }
+    .auth-card .form-label {
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        font-weight: 500;
+    }
+    .auth-card .btn-dark {
+        padding: 0.65rem;
+        font-size: clamp(0.9rem, 3vw, 1rem);
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    @@media (max-width: 380px) {
+        .name-col {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+        }
+    }
+    .auth-footer {
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    }
+    .password-wrapper {
+        position: relative;
+    }
+    .password-wrapper .form-control {
+        padding-right: 2.75rem;
+    }
+    .btn-eye {
+        position: absolute;
+        top: 50%;
+        right: 0.65rem;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        color: #6c757d;
+        line-height: 1;
+        font-size: 1.1rem;
+    }
+    .btn-eye:hover { color: #343a40; }
+</style>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+            <div class="row g-3">
+                <div class="col-6 name-col">
+                    <label asp-for="FirstName" class="form-label"></label>
+                    <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-6 name-col">
+                    <label asp-for="LastName" class="form-label"></label>
+                    <input asp-for="LastName" class="form-control" autocomplete="family-name" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="email" inputmode="email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="passwordInput">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password"
+                               id="passwordInput"
+                               name="Password"
+                               class="form-control @(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               autocomplete="new-password" />
+                        <button type="button" class="btn-eye"
+                                id="togglePassword" aria-label="Toggle password">👁️</button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label" for="confirmPasswordInput">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password"
+                               id="confirmPasswordInput"
+                               name="ConfirmPassword"
+                               class="form-control @(ViewData.ModelState["ConfirmPassword"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               autocomplete="new-password" />
+                        <button type="button" class="btn-eye"
+                                id="toggleConfirmPassword" aria-label="Toggle confirm password">👁️</button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-dark w-100 mt-3">Register</button>
+        </form>
+        <p class="mt-3 text-center auth-footer mb-0">
+            Already have an account?
+            <a asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl">Login</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScripts" />
+    <script>
+        function toggleVisibility(inputId, btnId) {
+            const input = document.getElementById(inputId);
+            const btn = document.getElementById(btnId);
+            btn.addEventListener('click', function () {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                this.textContent = isPassword ? '🙈' : '👁️';
+            });
+        }
+        toggleVisibility('passwordInput', 'togglePassword');
+        toggleVisibility('confirmPasswordInput', 'toggleConfirmPassword');
+    </script>
+}

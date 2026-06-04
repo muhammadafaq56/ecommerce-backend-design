@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "Email Confirmed";
+}
+
+<style>
+    .confirm-wrapper {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .confirm-card {
+        width: 100%;
+        max-width: 480px;
+        border-radius: 14px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        padding: clamp(2rem, 8vw, 3.5rem) clamp(1.25rem, 6vw, 3rem);
+        text-align: center;
+    }
+
+        .confirm-card .icon {
+            font-size: clamp(2.5rem, 10vw, 3.5rem);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .confirm-card h2 {
+            font-size: clamp(1.3rem, 5vw, 1.7rem);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .confirm-card p {
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .confirm-card .btn {
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 160px;
+        }
+</style>
+
+<div class="confirm-wrapper">
+    <div class="card confirm-card">
+        @if (ViewBag.Error != null)
+        {
+            <span class="icon">❌</span>
+            <h2>Confirmation Failed</h2>
+            <p class="text-danger">@ViewBag.Error</p>
+            <a asp-action="Register" class="btn btn-dark mt-2">Register Again</a>
+        }
+        else
+        {
+            <span class="icon">✅</span>
+            <h2>Email Confirmed!</h2>
+            <p>Your account is now active. You are now logged in.</p>
+            <a asp-controller="Shop" asp-action="Index" class="btn btn-dark mt-2">Start Shopping</a>
+        }
+    </div>
+</div>

@@ -1,0 +1,241 @@
+@model ECommerceApp.Models.Order
+@using ECommerceApp.Models
+@{
+    ViewData["Title"] = "Order " + Model.OrderNumber;
+    var deliveryDate = Model.DeliveredAt ?? Model.CreatedAt;
+    var isEligibleToCancel = Model.OrderStatus == OrderStatus.Processing || Model.OrderStatus == OrderStatus.Shipped;
+    var isEligibleToReturn = Model.OrderStatus == OrderStatus.Delivered && DateTime.UtcNow <= deliveryDate.AddDays(7);
+    var showActionButton = isEligibleToCancel || isEligibleToReturn;
+}
+
+<style>
+    .order-title {
+        font-size: clamp(1.2rem, 5vw, 1.7rem);
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+    }
+
+    .order-date {
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        margin-bottom: 1.25rem;
+    }
+
+    .order-card {
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+        .order-card .card-header {
+            font-size: clamp(0.82rem, 2.5vw, 0.9rem);
+            font-weight: 600;
+            background: #f8f9fa;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-card .card-body {
+            padding: clamp(0.75rem, 3vw, 1.1rem);
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+        margin-bottom: 0.4rem;
+    }
+
+        .price-row span:first-child {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .price-row span:last-child {
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .price-row.total {
+            font-weight: 700;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+    .address-line {
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        margin-bottom: 0.25rem;
+        word-break: break-word;
+    }
+
+    .status-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: clamp(0.8rem, 2.5vw, 0.88rem);
+        margin-bottom: 0.5rem;
+    }
+
+        .status-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-row .badge {
+            font-size: clamp(0.72rem, 2vw, 0.8rem);
+            padding: 0.3em 0.65em;
+            border-radius: 6px;
+        }
+
+    .back-btn {
+        font-size: clamp(0.82rem, 2.5vw, 0.9rem);
+        padding: 0.5rem 1.1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+
+    @@media (max-width: 767px) {
+        .order-sidebar {
+            margin-top: 0;
+        }
+    }
+</style>
+
+<h2 class="order-title">Order #@Model.OrderNumber</h2>
+<p class="text-muted order-date">Placed on @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
+
+<div class="row g-3">
+    <div class="col-12 col-md-7">
+        <div class="card order-card">
+            <div class="card-header">Items</div>
+            <div class="card-body">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="price-row">
+                        <span>@item.ProductName &times; @item.Quantity</span>
+                        <span>$@(item.UnitPrice* item.Quantity)</span>
+                    </div>
+                }
+                <hr class="my-2" />
+                <div class="price-row">
+                    <span>Subtotal</span><span>$@Model.SubTotal</span>
+                </div>
+                <div class="price-row">
+                    <span>Shipping</span>
+                    <span>@(Model.ShippingCost == 0 ? "Free" : "$" + Model.ShippingCost)</span>
+                </div>
+                <div class="price-row">
+                    <span>Tax</span><span>$@Model.Tax</span>
+                </div>
+                <hr class="my-2" />
+                <div class="price-row total">
+                    <span>Total</span><span>$@Model.Total</span>
+                </div>
+            </div>
+        </div>
+
+        @if (showActionButton)
+        {
+            <div class="card border-warning my-3 shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h6 class="mb-0 fw-bold text-dark">@(isEligibleToCancel ? "Order Cancellation" : "Product Return Option Open")</h6>
+                        <small class="text-muted">@(isEligibleToCancel ? "You can submit a request to stop processing this order." : "Return option closes 7 days post delivery date.")</small>
+                    </div>
+                    <button type="button"
+                            class="btn btn-warning fw-semibold btn-sm shadow-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#returnPromptModal">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> @(isEligibleToCancel ? "Cancel Order" : "Return Items")
+                    </button>
+                </div>
+            </div>
+        }
+        else if (Model.OrderStatus == OrderStatus.ReturnProcessing)
+        {
+            <div class="card border-info my-3 shadow-sm bg-light">
+                <div class="card-body">
+                    <h6 class="mb-1 fw-bold text-info"><i class="bi bi-hourglass-split me-1"></i> Request Under Review</h6>
+                    <p class="mb-0 small text-muted">Our administration team is reviewing your request. No further actions are required from your end.</p>
+                </div>
+            </div>
+        }
+        else if (Model.OrderStatus == OrderStatus.Delivered && !isEligibleToReturn)
+        {
+            <div class="card border-light my-3 bg-light">
+                <div class="card-body py-2">
+                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i> This order has been delivered for more than 7 days and can no longer be returned.</small>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-12 col-md-5 order-sidebar">
+        <div class="card order-card">
+            <div class="card-header">Shipping Address</div>
+            <div class="card-body">
+                <p class="address-line fw-semibold">@Model.CustomerName</p>
+                <p class="address-line">@Model.ShippingAddress</p>
+                <p class="address-line">@Model.ShippingCity, @Model.ShippingPostalCode</p>
+                <p class="address-line mb-0">@Model.ShippingCountry</p>
+            </div>
+        </div>
+
+        <div class="card order-card">
+            <div class="card-header">Status</div>
+            <div class="card-body">
+                <div class="status-row">
+                    <span class="text-muted">Order</span>
+                    <span class="badge bg-secondary">@Model.OrderStatus</span>
+                </div>
+                <div class="status-row">
+                    <span class="text-muted">Payment</span>
+                    <span class="badge bg-@(Model.PaymentStatus == PaymentStatus.Paid ? "success" : Model.PaymentStatus == PaymentStatus.Refunded ? "info" : "warning")">
+                        @Model.PaymentStatus
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-outline-dark back-btn">&#8592; Back to Orders</a>
+
+@* Modal rendered outside the content flow but still inside RenderBody.
+   The stacking context fix is in _Layout.cshtml (animation moved off <main>). *@
+@if (showActionButton)
+{
+    <div class="modal fade" id="returnPromptModal" tabindex="-1" aria-labelledby="returnPromptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="returnPromptModalLabel">
+                        <i class="bi bi-arrow-left-right me-2 text-warning"></i>Confirm Action Request
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="ReturnRequest" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <p class="text-muted mb-3">
+                            To verify this transaction, type your exact order number below:
+                            <br /><strong>@Model.OrderNumber</strong>
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label font-monospace small">Enter Order Number:</label>
+                            <input type="text" name="confirmOrderNumber" class="form-control"
+                                   placeholder="e.g. @Model.OrderNumber" autocomplete="off" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Abort</button>
+                        <button type="submit" class="btn btn-sm btn-warning fw-semibold">Confirm Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

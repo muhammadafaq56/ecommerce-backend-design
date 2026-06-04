@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Cookie Policy – Afaq Mart";
+}
+
+<style>
+    .policy-wrap { max-width: 760px; margin: 3rem auto; padding: 0 1rem 3rem; }
+    .policy-wrap h1 { font-size: 1.8rem; font-weight: 800; color: var(--am-ink); margin-bottom: .4rem; }
+    .policy-updated { font-size: .8rem; color: var(--am-muted); margin-bottom: 2rem; }
+    .policy-wrap h2 { font-size: 1.1rem; font-weight: 700; color: var(--am-ink); margin: 2rem 0 .6rem; }
+    .policy-wrap p, .policy-wrap li { color: #475569; line-height: 1.8; font-size: .93rem; margin-bottom: .75rem; }
+    .policy-wrap ul { padding-left: 1.4rem; }
+    .policy-wrap hr { border: none; border-top: 1px solid var(--am-border); margin: 2rem 0; }
+
+    .cookie-table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: 1rem 0; }
+    .cookie-table th { background: var(--am-page); color: var(--am-ink); font-weight: 700; text-align: left; padding: .65rem 1rem; border: 1px solid var(--am-border); }
+    .cookie-table td { padding: .6rem 1rem; border: 1px solid var(--am-border); color: #475569; vertical-align: top; }
+</style>
+
+<div class="policy-wrap">
+    <h1>Cookie Policy</h1>
+    <p class="policy-updated">Last updated: May 2026</p>
+
+    <p>
+        This Cookie Policy explains what cookies are, which ones Afaq Mart uses,
+        and how you can control them.
+    </p>
+
+    <hr />
+
+    <h2>1. What Are Cookies?</h2>
+    <p>
+        Cookies are small text files stored on your device when you visit a website.
+        They help the site remember your preferences and actions over a period of time,
+        so you don't have to re-enter information every time you visit.
+    </p>
+
+    <h2>2. Cookies We Use</h2>
+    <table class="cookie-table">
+        <thead>
+            <tr>
+                <th>Cookie Name</th>
+                <th>Type</th>
+                <th>Purpose</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>.AspNetCore.Session</td>
+                <td>Essential</td>
+                <td>Keeps your session active (cart, login state)</td>
+                <td>Session</td>
+            </tr>
+            <tr>
+                <td>.AspNetCore.Antiforgery</td>
+                <td>Essential</td>
+                <td>Prevents cross-site request forgery (CSRF) attacks</td>
+                <td>Session</td>
+            </tr>
+            <tr>
+                <td>auth_token</td>
+                <td>Essential</td>
+                <td>Keeps you logged in between visits</td>
+                <td>30 days</td>
+            </tr>
+            <tr>
+                <td>_ga, _gid</td>
+                <td>Analytics</td>
+                <td>Google Analytics — tracks page visits and usage patterns</td>
+                <td>2 years / 24 hours</td>
+            </tr>
+            <tr>
+                <td>cart_id</td>
+                <td>Functional</td>
+                <td>Remembers items in your shopping cart</td>
+                <td>7 days</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Types of Cookies</h2>
+    <ul>
+        <li><strong>Essential cookies</strong> — required for the website to function. Cannot be disabled.</li>
+        <li><strong>Functional cookies</strong> — remember your preferences (e.g. cart contents).</li>
+        <li><strong>Analytics cookies</strong> — help us understand how visitors use our site so we can improve it.</li>
+    </ul>
+
+    <h2>4. How to Control Cookies</h2>
+    <p>
+        You can control and delete cookies through your browser settings.
+        Note that disabling essential cookies may break core features like login and cart.
+    </p>
+    <ul>
+        <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" style="color:var(--am-accent);">Chrome</a></li>
+        <li><a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer" target="_blank" style="color:var(--am-accent);">Firefox</a></li>
+        <li><a href="https://support.apple.com/en-gb/guide/safari/sfri11471/mac" target="_blank" style="color:var(--am-accent);">Safari</a></li>
+        <li><a href="https://support.microsoft.com/en-us/windows/delete-and-manage-cookies-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank" style="color:var(--am-accent);">Edge</a></li>
+    </ul>
+
+    <h2>5. Contact</h2>
+    <p>
+        For cookie-related questions, visit our
+        <a asp-controller="Home" asp-action="Contact" style="color:var(--am-accent);">Contact page</a>
+    </p>
+</div>

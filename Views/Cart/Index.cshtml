@@ -1,0 +1,457 @@
+﻿@model List<ECommerceApp.Models.CartItem>
+@using ECommerceApp.Services
+@inject CartReservationService ReservationService
+@{
+    ViewData["Title"] = "Cart";
+
+    // Build initial timer data server-side so badges show on first render,
+    // not after the first JS poll. Auto-start timer for items with no active one.
+    var initialTimers = new Dictionary<int, int>();
+    foreach (var item in Model)
+    {
+        var remaining = ReservationService.GetRemainingSeconds(item.Id);
+        if (remaining == null)
+        {
+            ReservationService.StartOrReset(item.Id);
+            remaining = (int)CartReservationService.ReservationWindow.TotalSeconds;
+        }
+        initialTimers[item.Id] = remaining.Value;
+    }
+}
+
+<style>
+    .cart-title {
+        font-size: clamp(1.3rem,5vw,1.8rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .cart-table thead th {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #555;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .cart-table td {
+        vertical-align: middle;
+        font-size: clamp(0.82rem,2.5vw,0.95rem);
+    }
+
+    .qty-input {
+        width: 70px !important;
+    }
+
+    /* Reservation timer badge */
+    .reservation-timer {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: #d1fae5;
+        color: #065f46;
+        white-space: nowrap;
+        transition: background .4s, color .4s;
+    }
+
+        .reservation-timer.warn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .reservation-timer.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+    /* Mobile cards */
+    .cart-card {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.85rem;
+        margin-bottom: 0.85rem;
+        background: #fff;
+        box-shadow: 0 1px 6px rgba(0,0,0,.05);
+    }
+
+    .cart-card-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .cart-card-meta {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.6rem;
+    }
+
+    .cart-card-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .cart-card-total {
+        font-weight: 700;
+        color: #198754;
+        font-size: 0.95rem;
+    }
+
+    .cart-summary {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .cart-summary .total-amount {
+            font-weight: 700;
+            color: #198754;
+            font-size: clamp(1rem,3.5vw,1.2rem);
+        }
+
+    .cart-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+        .cart-actions .btn {
+            flex: 1 1 auto;
+            min-width: 140px;
+            border-radius: 8px;
+        }
+
+    .row-removing {
+        transition: opacity .25s ease;
+        opacity: 0 !important;
+        pointer-events: none;
+    }
+</style>
+
+<h2 class="cart-title">Your Cart</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Your cart is empty. <a asp-controller="Shop" asp-action="Index">Continue shopping</a>
+    </div>
+}
+else
+{
+    var total = Model.Sum(i => i.Product!.Price * i.Quantity);
+
+    <!-- DESKTOP -->
+    <div class="d-none d-md-block">
+        <table class="table cart-table" id="cart-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Reserved for</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr data-item-id="@item.Id" data-price="@item.Product!.Price">
+                        <td>@item.Product?.Name</td>
+                        <td>$@item.Product?.Price.ToString("N2")</td>
+                        <td>
+                            <div class="d-flex gap-1 align-items-center">
+                                <input type="number" value="@item.Quantity" min="1"
+                                       max="@(item.Product!.StockQuantity + item.Quantity)"
+                                       class="form-control form-control-sm qty-input"
+                                       data-item-id="@item.Id" />
+                                <button class="btn btn-outline-secondary btn-sm btn-update"
+                                        data-item-id="@item.Id">
+                                    Update
+                                </button>
+                            </div>
+                        </td>
+                        <td class="fw-semibold text-success row-total">
+                            $@((item.Product!.Price * item.Quantity).ToString("N2"))
+                        </td>
+                        <td>
+                            <span class="reservation-timer" data-item-id="@item.Id">
+                                @{
+                                    var sec = initialTimers[item.Id];
+                                    var m = sec / 60; var s = sec % 60;
+                                }
+                                @($"{m}:{s:D2}")
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger btn-sm btn-remove"
+                                    data-item-id="@item.Id">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-end fw-bold">Total:</td>
+                    <td class="fw-bold text-success" id="grand-total-desktop">$@total.ToString("N2")</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- MOBILE -->
+    <div class="d-md-none" id="cart-cards">
+        @foreach (var item in Model)
+        {
+            <div class="cart-card" data-item-id="@item.Id" data-price="@item.Product!.Price">
+                <div class="cart-card-name">@item.Product?.Name</div>
+                <div class="cart-card-meta">
+                    Unit price: $@item.Product?.Price.ToString("N2") &nbsp;&middot;&nbsp;
+                    Reserved:
+                    @{
+                        var sec2 = initialTimers[item.Id];
+                        var m2 = sec2 / 60; var s2 = sec2 % 60;
+                    }
+                    <span class="reservation-timer" data-item-id="@item.Id">@($"{m2}:{s2:D2}")</span>
+                </div>
+                <div class="cart-card-row">
+                    <div class="d-flex gap-1 align-items-center">
+                        <input type="number" value="@item.Quantity" min="1"
+                               max="@(item.Product!.StockQuantity + item.Quantity)"
+                               class="form-control form-control-sm qty-input"
+                               data-item-id="@item.Id" />
+                        <button class="btn btn-outline-secondary btn-sm btn-update"
+                                data-item-id="@item.Id">
+                            Update
+                        </button>
+                    </div>
+                    <span class="cart-card-total row-total" data-item-id="@item.Id">
+                        $@((item.Product!.Price * item.Quantity).ToString("N2"))
+                    </span>
+                    <button class="btn btn-danger btn-sm btn-remove"
+                            data-item-id="@item.Id">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        }
+
+        <div class="cart-summary">
+            <span class="fw-semibold">Order Total</span>
+            <span class="total-amount" id="grand-total-mobile">$@total.ToString("N2")</span>
+        </div>
+    </div>
+
+    <div class="cart-actions">
+        <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-dark">Continue Shopping</a>
+        <a asp-controller="Cart" asp-action="Checkout" class="btn btn-dark">Proceed to Checkout</a>
+    </div>
+}
+
+<div id="toast-container"
+     style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;"></div>
+
+@section Scripts {
+    <script>
+        (function () {
+
+            // Seed local timers from server-rendered values (no flash of "..." on load)
+            var localTimers = @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(
+                                    initialTimers.ToDictionary(k => k.Key.ToString(), k => k.Value)
+                            )
+                    );
+
+        // Convert string keys to int keys
+        var timers = {};
+        Object.keys(localTimers).forEach(function(k) { timers[parseInt(k)] = localTimers[k]; });
+
+            function fmtTime(sec) {
+                if (sec == null || sec < 0) sec = 0;
+                var m = Math.floor(sec / 60);
+                var s = sec % 60;
+                return m + ':' + (s < 10 ? '0' : '') + s;
+            }
+
+            function applyBadges() {
+                document.querySelectorAll('.reservation-timer[data-item-id]').forEach(function (badge) {
+                    var id  = parseInt(badge.dataset.itemId);
+                    var sec = timers[id];
+                    if (sec == null) return;
+                    badge.textContent = fmtTime(sec);
+                    badge.className   = 'reservation-timer' +
+                        (sec <= 60 ? ' danger' : sec <= 300 ? ' warn' : '');
+                });
+            }
+
+            // Tick every second
+            setInterval(function () {
+                Object.keys(timers).forEach(function (id) {
+                    if (timers[id] > 0) timers[id]--;
+                });
+                applyBadges();
+            }, 1000);
+
+            // Re-sync with server every 15 seconds to correct drift and catch expiries
+            function syncTimers() {
+                fetch('/Cart/Timers')
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        Object.keys(data.timers).forEach(function (id) {
+                            timers[parseInt(id)] = data.timers[id];
+                        });
+                        applyBadges();
+                    })
+                    .catch(function () {});
+            }
+            setInterval(syncTimers, 15000);
+
+            // Helpers
+            function toast(msg, type) {
+                var c = document.getElementById('toast-container');
+                var t = document.createElement('div');
+                t.className = 'alert alert-' + (type || 'success') + ' shadow py-2 px-3 mb-0';
+                t.style.cssText = 'min-width:210px;font-size:0.88rem;';
+                t.textContent = msg;
+                c.appendChild(t);
+                setTimeout(function () { t.remove(); }, 3500);
+            }
+
+            function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+
+            function recalcTotal() {
+                var sum = 0;
+                document.querySelectorAll('#cart-table tbody tr[data-item-id]').forEach(function (row) {
+                    sum += (parseFloat(row.dataset.price) || 0) * (parseInt(row.querySelector('.qty-input').value) || 0);
+                });
+                if (sum === 0) {
+                    document.querySelectorAll('#cart-cards .cart-card[data-item-id]').forEach(function (card) {
+                        sum += (parseFloat(card.dataset.price) || 0) * (parseInt(card.querySelector('.qty-input').value) || 0);
+                    });
+                }
+                var dt = document.getElementById('grand-total-desktop');
+                var mt = document.getElementById('grand-total-mobile');
+                if (dt) dt.textContent = fmt(sum);
+                if (mt) mt.textContent = fmt(sum);
+            }
+
+            function getElements(itemId) {
+                return {
+                    desktopRow : document.querySelector('#cart-table tr[data-item-id="' + itemId + '"]'),
+                    mobileCard : document.querySelector('#cart-cards .cart-card[data-item-id="' + itemId + '"]'),
+                    qtyInput   : document.querySelector('.qty-input[data-item-id="' + itemId + '"]')
+                };
+            }
+
+            function post(url, body) {
+                return fetch(url, {
+                    method  : 'POST',
+                    headers : { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body    : body
+                }).then(function (r) { return r.json(); });
+            }
+
+            function reloadIfEmpty() {
+                var remaining = document.querySelectorAll(
+                    '#cart-table tr[data-item-id], #cart-cards .cart-card[data-item-id]'
+                );
+                if (remaining.length === 0) location.reload();
+            }
+
+            // Remove
+            document.addEventListener('click', function (e) {
+                var btn = e.target.closest('.btn-remove');
+                if (!btn) return;
+
+                var itemId = btn.dataset.itemId;
+                var els    = getElements(itemId);
+
+                btn.disabled    = true;
+                btn.textContent = '...';
+
+                if (els.desktopRow) els.desktopRow.classList.add('row-removing');
+                if (els.mobileCard) els.mobileCard.classList.add('row-removing');
+
+                post('/Cart/Remove', 'cartItemId=' + itemId)
+                    .then(function (data) {
+                        if (data.success) {
+                            delete timers[parseInt(itemId)];
+                            setTimeout(function () {
+                                if (els.desktopRow) els.desktopRow.remove();
+                                if (els.mobileCard) els.mobileCard.remove();
+                                recalcTotal();
+                                if (window.setCartBadge) window.setCartBadge(data.count);
+                                reloadIfEmpty();
+                            }, 260);
+                            toast('Item removed');
+                        } else {
+                            if (els.desktopRow) els.desktopRow.classList.remove('row-removing');
+                            if (els.mobileCard) els.mobileCard.classList.remove('row-removing');
+                            btn.disabled    = false;
+                            btn.textContent = 'Remove';
+                            toast(data.message || 'Could not remove item.', 'danger');
+                        }
+                    })
+                    .catch(function () {
+                        if (els.desktopRow) els.desktopRow.classList.remove('row-removing');
+                        if (els.mobileCard) els.mobileCard.classList.remove('row-removing');
+                        btn.disabled    = false;
+                        btn.textContent = 'Remove';
+                        toast('Something went wrong.', 'danger');
+                    });
+            });
+
+            // Update — reloads page on success so quantities and timers are fresh
+            document.addEventListener('click', function (e) {
+                var btn = e.target.closest('.btn-update');
+                if (!btn) return;
+
+                var itemId  = btn.dataset.itemId;
+                var els     = getElements(itemId);
+                var qty     = parseInt(els.qtyInput ? els.qtyInput.value : 1) || 1;
+                var maxAttr = parseInt(els.qtyInput ? els.qtyInput.max   : 9999);
+
+                if (qty < 1)       { qty = 1;       if (els.qtyInput) els.qtyInput.value = 1; }
+                if (qty > maxAttr) { qty = maxAttr; if (els.qtyInput) els.qtyInput.value = maxAttr; }
+
+                btn.disabled    = true;
+                btn.textContent = '...';
+
+                post('/Cart/Update', 'cartItemId=' + itemId + '&quantity=' + qty)
+                    .then(function (data) {
+                        if (data.success) {
+                            if (window.setCartBadge) window.setCartBadge(data.count);
+                            toast('Quantity updated — refreshing...');
+                            setTimeout(function () { location.reload(); }, 700);
+                        } else {
+                            if (data.maxQty !== undefined && els.qtyInput) {
+                                els.qtyInput.value = data.maxQty;
+                                els.qtyInput.max   = data.maxQty;
+                            }
+                            toast(data.message || 'Update failed.', 'warning');
+                            btn.disabled    = false;
+                            btn.textContent = 'Update';
+                        }
+                    })
+                    .catch(function () {
+                        toast('Something went wrong.', 'danger');
+                        btn.disabled    = false;
+                        btn.textContent = 'Update';
+                    });
+            });
+
+        })();
+    </script>
+}

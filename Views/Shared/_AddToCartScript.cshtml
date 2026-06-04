@@ -1,0 +1,108 @@
+﻿<!-- Put this file in Views/Shared/_AddToCartScript.cshtml -->
+<div id="cart-toast-wrap"
+     style="position:fixed;bottom:1.2rem;right:1.2rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;"></div>
+
+<script>
+    // ── Update cart badge (desktop + mobile) ──────────────────
+    function setCartBadge(count) {
+        ['cart-count', 'cart-count-mobile'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = count;
+            el.style.display = count > 0 ? 'inline' : 'none';
+            // blink animation
+            el.style.transform = 'scale(1.7)';
+            setTimeout(function () { el.style.transform = 'scale(1)'; }, 200);
+        });
+    }
+
+    // ── Fetch count on every page load ───────────────────────
+    fetch('/Cart/Count')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { setCartBadge(d.count || 0); })
+        .catch(function () {});
+
+    // ── Toast helper ─────────────────────────────────────────
+    function showCartToast(msg, type) {
+        var wrap  = document.getElementById('cart-toast-wrap');
+        var toast = document.createElement('div');
+        toast.className = 'alert alert-' + (type || 'success') + ' py-2 px-3 shadow mb-0';
+        toast.style.cssText = 'font-size:0.88rem;pointer-events:auto;min-width:180px;';
+        toast.textContent = msg;
+        wrap.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 2500);
+    }
+
+    // ── Wire every .btn-add-cart button ──────────────────────
+    document.querySelectorAll('.btn-add-cart').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+            var productId = this.dataset.productId;
+            var original  = this.textContent;
+            this.disabled = true;
+            this.textContent = '...';
+
+            try {
+                var res  = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'productId=' + productId + '&quantity=1'
+                });
+                var data = await res.json();
+
+                if (data.success) {
+                    setCartBadge(data.count);
+                    showCartToast('Added to cart!', 'success');
+                    this.textContent = 'Added ✓';
+                    var me = this;
+                    setTimeout(function () { me.textContent = original; me.disabled = false; }, 1500);
+                } else {
+                    showCartToast(data.message || 'Could not add.', 'danger');
+                    this.textContent = original;
+                    this.disabled = false;
+                }
+            } catch (e) {
+                showCartToast('Something went wrong.', 'danger');
+                this.textContent = original;
+                this.disabled = false;
+            }
+        });
+    });
+
+    // ── Detail page add button (has qty input) ───────────────
+    var detailBtn = document.getElementById('btn-add-detail');
+    if (detailBtn) {
+        detailBtn.addEventListener('click', async function () {
+            var productId = this.dataset.productId;
+            var qtyInput  = document.getElementById('qty-input');
+            var quantity  = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+            var original  = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Adding...';
+
+            try {
+                var res  = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'productId=' + productId + '&quantity=' + quantity
+                });
+                var data = await res.json();
+
+                if (data.success) {
+                    setCartBadge(data.count);
+                    showCartToast('Added to cart!', 'success');
+                    this.innerHTML = '<i class="bi bi-check-lg me-1"></i>Added!';
+                    var me = this;
+                    setTimeout(function () { me.innerHTML = original; me.disabled = false; }, 1800);
+                } else {
+                    showCartToast(data.message || 'Could not add.', 'danger');
+                    this.innerHTML = original;
+                    this.disabled = false;
+                }
+            } catch (e) {
+                showCartToast('Something went wrong.', 'danger');
+                this.innerHTML = original;
+                this.disabled = false;
+            }
+        });
+    }
+</script>

@@ -1,0 +1,814 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ECommerceApp.Models.ApplicationUser> SignInManager
+
+<style>
+    /* ═══ RESET ═══ */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    /* ═══════════════════════════════
+           COLOR TOKENS  (deep navy theme)
+           ═══════════════════════════════ */
+    :root {
+        --nb-bg-top: #0b0f1a;
+        --nb-bg-main: #0f1626;
+        --nb-bg-nav: #111d35;
+        --nb-bg-nav-mob: #0d1628;
+        --nb-accent: #3b82f6;
+        --nb-accent-h: #2563eb;
+        --nb-accent-soft: rgba(59,130,246,0.12);
+        --nb-accent-brd: rgba(59,130,246,0.28);
+        --nb-border: rgba(255,255,255,0.07);
+        --nb-border-mid: rgba(255,255,255,0.12);
+        --nb-text: #e2e8f0;
+        --nb-muted: #94a3b8;
+        --nb-white: #ffffff;
+        --nb-gold: #f59e0b;
+        --nb-gold-soft: rgba(245,158,11,0.12);
+        --nb-gold-brd: rgba(245,158,11,0.28);
+    }
+
+    /* ═══════════════════════
+           1. TOP INFO BAR
+           ═══════════════════════ */
+    .nb-topbar {
+        background: var(--nb-bg-top);
+        border-bottom: 1px solid var(--nb-border);
+        padding: 6px 0;
+        font-size: 12px;
+        color: var(--nb-muted);
+    }
+
+    .nb-topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .nb-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .nb-topbar-left i {
+            color: var(--nb-accent);
+            font-size: 13px;
+        }
+
+    .nb-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .nb-top-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--nb-muted);
+        font-size: 12px;
+        text-decoration: none;
+        padding: 3px 10px;
+        border-radius: 4px;
+        transition: color 0.15s, background 0.15s;
+    }
+
+        .nb-top-link:hover {
+            color: var(--nb-white);
+            background: rgba(255,255,255,0.06);
+        }
+
+    .nb-top-divider {
+        width: 1px;
+        height: 12px;
+        background: var(--nb-border-mid);
+    }
+
+    .nb-top-register {
+        background: var(--nb-accent);
+        color: var(--nb-white) !important;
+        padding: 3px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: background 0.15s !important;
+    }
+
+        .nb-top-register:hover {
+            background: var(--nb-accent-h) !important;
+            color: var(--nb-white) !important;
+        }
+
+    /* ═══════════════════════
+           2. MAIN BAR
+           ═══════════════════════ */
+    .nb-mainbar {
+        background: var(--nb-bg-main);
+        border-bottom: 2px solid var(--nb-accent);
+        padding: 14px 0;
+    }
+
+    .nb-mainbar-inner {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Brand */
+    .nb-brand {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--nb-white) !important;
+        text-decoration: none !important;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+        .nb-brand span {
+            color: var(--nb-accent);
+        }
+
+    /* Search */
+    .nb-search-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        max-width: 580px;
+        margin: 0 auto;
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px var(--nb-accent-brd);
+    }
+
+    .nb-clear-btn {
+        background: var(--nb-accent);
+        color: var(--nb-white);
+        border: none;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background 0.15s;
+        font-family: inherit;
+    }
+
+        .nb-clear-btn:hover {
+            background: var(--nb-accent-h);
+        }
+
+    .nb-search-input-field {
+        flex: 1;
+        border: none;
+        padding: 10px 14px;
+        font-size: 13.5px;
+        outline: none;
+        background: #f0f4ff;
+        color: #1e293b;
+        min-width: 0;
+        font-family: inherit;
+    }
+
+        .nb-search-input-field::placeholder {
+            color: #94a3b8;
+        }
+
+    .nb-search-submit {
+        background: var(--nb-accent);
+        color: var(--nb-white);
+        border: none;
+        padding: 10px 22px;
+        font-size: 13.5px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background 0.15s;
+        font-family: inherit;
+    }
+
+        .nb-search-submit:hover {
+            background: var(--nb-accent-h);
+        }
+
+    /* Cart */
+    .nb-cart-wrap {
+        margin-left: auto;
+        flex-shrink: 0;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        color: var(--nb-white);
+        position: relative;
+    }
+
+    .nb-cart-icon-wrap {
+        position: relative;
+        display: inline-block;
+    }
+
+        .nb-cart-icon-wrap i {
+            font-size: 27px;
+            color: var(--nb-text);
+        }
+
+    #cart-count {
+        position: absolute;
+        top: -5px;
+        right: -7px;
+        background: var(--nb-accent);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 50%;
+        width: 17px;
+        height: 17px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .nb-cart-label {
+        font-size: 11px;
+        color: var(--nb-muted);
+        white-space: nowrap;
+    }
+
+    /* Mobile toggler */
+    .nb-toggler {
+        border: 1px solid var(--nb-border-mid) !important;
+        border-radius: 6px;
+        padding: 6px 9px;
+        background: none;
+        margin-left: auto;
+        display: none;
+        cursor: pointer;
+    }
+
+        .nb-toggler i {
+            font-size: 20px;
+            color: var(--nb-white);
+        }
+
+    /* ═══════════════════════
+           3. NAV LINKS BAR
+           ═══════════════════════ */
+    .nb-navlinks-bar {
+        background: var(--nb-bg-nav);
+        border-bottom: 1px solid var(--nb-border);
+    }
+
+    .nb-navlinks-inner {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+
+    .nb-nav-link {
+        color: var(--nb-muted) !important;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 11px 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-bottom: 2px solid transparent;
+        transition: color 0.14s, border-color 0.14s;
+        white-space: nowrap;
+        font-family: inherit;
+    }
+
+        .nb-nav-link:hover,
+        .nb-nav-link.active-link {
+            color: var(--nb-white) !important;
+            border-bottom-color: var(--nb-accent);
+        }
+
+        .nb-nav-link i {
+            font-size: 14px;
+        }
+
+    .nb-navlinks-spacer {
+        flex: 1;
+    }
+
+    /* Admin badge */
+    .nb-admin-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--nb-gold) !important;
+        font-size: 12.5px;
+        font-weight: 600;
+        padding: 6px 13px;
+        border-radius: 5px;
+        background: var(--nb-gold-soft);
+        border: 1px solid var(--nb-gold-brd);
+        text-decoration: none !important;
+        transition: background 0.14s;
+        margin: 4px 3px;
+        white-space: nowrap;
+    }
+
+        .nb-admin-link:hover {
+            background: rgba(245,158,11,0.2);
+        }
+
+        .nb-admin-link i {
+            font-size: 13px;
+        }
+
+    /* ── User dropdown ── */
+    .nb-user-dd {
+        position: relative;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nb-user-dd-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--nb-muted) !important;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 11px 13px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        transition: color 0.14s;
+    }
+
+        .nb-user-dd-toggle:hover {
+            color: var(--nb-white) !important;
+        }
+
+        .nb-user-dd-toggle i {
+            font-size: 15px;
+        }
+
+    .nb-user-dd-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        background: #1a2540;
+        border: 1px solid var(--nb-border-mid);
+        border-radius: 8px;
+        padding: 6px;
+        min-width: 175px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 9999;
+        list-style: none;
+        margin: 0;
+    }
+
+        .nb-user-dd-menu.open {
+            display: block;
+        }
+
+        .nb-user-dd-menu a,
+        .nb-user-dd-menu button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 9px 12px;
+            color: rgba(255,255,255,0.75);
+            font-size: 13px;
+            border-radius: 5px;
+            text-decoration: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.13s, color 0.13s;
+            text-align: left;
+        }
+
+            .nb-user-dd-menu a:hover,
+            .nb-user-dd-menu button:hover {
+                background: rgba(255,255,255,0.07);
+                color: #fff;
+            }
+
+        .nb-user-dd-menu .nb-dd-divider {
+            border: none;
+            border-top: 1px solid var(--nb-border);
+            margin: 4px 0;
+        }
+
+    .nb-dd-logout {
+        color: #f87171 !important;
+    }
+
+        .nb-dd-logout:hover {
+            background: rgba(248,113,113,0.1) !important;
+            color: #f87171 !important;
+        }
+
+    /* ═══════════════════════
+           4. MOBILE
+           ═══════════════════════ */
+    .nb-search-mobile-wrap {
+        display: none;
+        padding: 10px 0 4px;
+    }
+
+    .nb-search-mobile-inner {
+        display: flex;
+        align-items: center;
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px var(--nb-accent-brd);
+    }
+
+    /* Mobile nav collapse */
+    .nb-mobile-nav {
+        display: none;
+        background: var(--nb-bg-nav-mob);
+        border-top: 1px solid var(--nb-border);
+        padding: 6px 0 10px;
+    }
+
+        .nb-mobile-nav.open {
+            display: block;
+        }
+
+        .nb-mobile-nav .nb-nav-link {
+            display: flex;
+            padding: 10px 16px;
+            border-bottom: none;
+            border-left: 2px solid transparent;
+        }
+
+            .nb-mobile-nav .nb-nav-link:hover,
+            .nb-mobile-nav .nb-nav-link.active-link {
+                border-bottom-color: transparent;
+                border-left-color: var(--nb-accent);
+            }
+
+        .nb-mobile-nav .nb-admin-link {
+            margin: 4px 12px;
+            display: flex;
+        }
+
+        .nb-mobile-nav .nb-user-dd-menu {
+            position: static;
+            display: block;
+            background: rgba(255,255,255,0.03);
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0 0 0 16px;
+            min-width: 0;
+        }
+
+        .nb-mobile-nav .nb-user-dd-toggle {
+            padding: 10px 16px;
+            width: 100%;
+        }
+
+    @@media (max-width: 991px) {
+        .nb-search-wrap {
+            display: none;
+        }
+
+        .nb-toggler {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .nb-search-mobile-wrap {
+            display: block;
+        }
+
+        .nb-navlinks-bar {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .nb-topbar-left span {
+            display: none;
+        }
+
+        .nb-brand {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<!-- ══════════════════════════════
+     1. TOP INFO BAR
+     ══════════════════════════════ -->
+<div class="nb-topbar">
+    <div class="container nb-topbar-inner">
+
+        <div class="nb-topbar-left">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Pakistan</span>
+        </div>
+
+        <div class="nb-topbar-right">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <a class="nb-top-link" asp-controller="Account" asp-action="Profile">
+                    <i class="bi bi-person-circle"></i>
+                    <span>@User.Identity!.Name</span>
+                </a>
+            }
+            else
+            {
+                <a class="nb-top-link" asp-controller="Account" asp-action="Login">
+                    <i class="bi bi-person"></i> Login
+                </a>
+                <div class="nb-top-divider"></div>
+                <a class="nb-top-link nb-top-register" asp-controller="Account" asp-action="Register">
+                    Register
+                </a>
+            }
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════
+     2. MAIN BAR — Brand / Search / Cart
+     ══════════════════════════════ -->
+<div class="nb-mainbar">
+    <div class="container nb-mainbar-inner">
+
+        <a class="nb-brand" asp-controller="Home" asp-action="Index">
+            Afaq<span>Mart</span>
+        </a>
+
+        <!-- Desktop search -->
+        <div class="nb-search-wrap">
+            <button class="nb-clear-btn" id="nb-clear" type="button">Clear search</button>
+            <input class="nb-search-input-field" type="text" id="nb-search"
+                   placeholder="Search Product Name" autocomplete="off" />
+            <button class="nb-search-submit" type="button" id="nb-search-go">Search</button>
+        </div>
+
+        <!-- Cart -->
+        <a asp-controller="Cart" asp-action="Index" class="nb-cart-wrap" aria-label="Your cart">
+            <div class="nb-cart-icon-wrap">
+                <i class="bi bi-cart3"></i>
+                <span id="cart-count"></span>
+            </div>
+            <span class="nb-cart-label">Your Cart</span>
+        </a>
+
+        <!-- Mobile hamburger -->
+        <button class="nb-toggler" type="button" id="nb-mob-toggler" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════
+     3. DESKTOP NAV LINKS BAR
+     ══════════════════════════════ -->
+<div class="nb-navlinks-bar">
+    <div class="container">
+        <div class="nb-navlinks-inner">
+
+            <!-- Left nav links -->
+            <a class="nb-nav-link" asp-controller="Shop" asp-action="Index">
+                <i class="bi bi-grid"></i> All Products
+            </a>
+            <a class="nb-nav-link" asp-controller="Home" asp-action="Index" asp-fragment="new-heading">
+                <i class="bi bi-stars"></i> New Arrivals
+            </a>
+            <a class="nb-nav-link" asp-controller="Home" asp-action="Index" asp-fragment="bestsellers-heading">
+                <i class="bi bi-trophy"></i> Best Sellers
+            </a>
+            <a class="nb-nav-link" asp-controller="Home" asp-action="Index" asp-fragment="promo-section">
+                <i class="bi bi-tag"></i> Sale &amp; Deals
+            </a>
+
+            <div class="nb-navlinks-spacer"></div>
+
+            <!-- Right: Admin + User dropdown -->
+            @if (SignInManager.IsSignedIn(User))
+            {
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nb-admin-link"
+                       asp-area="Admin"
+                       asp-controller="Dashboard"
+                       asp-action="Index">
+                        <i class="bi bi-gear-fill"></i> Admin
+                    </a>
+                }
+
+                <!-- Custom user dropdown (no Bootstrap dependency) -->
+                <ul class="nb-user-dd" id="nb-user-dd">
+                    <li>
+                        <button class="nb-user-dd-toggle" id="nb-user-toggle" type="button"
+                                aria-expanded="false" aria-haspopup="true">
+                            <i class="bi bi-person-circle"></i>
+                            @User.Identity!.Name
+                            <i class="bi bi-chevron-down" style="font-size:11px;margin-left:2px;"></i>
+                        </button>
+                    </li>
+                    <ul class="nb-user-dd-menu" id="nb-user-menu" role="menu">
+                        <li>
+                            <a asp-controller="Account" asp-action="Profile">
+                                <i class="bi bi-person"></i> Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Order" asp-action="Index">
+                                <i class="bi bi-receipt"></i> My Orders
+                            </a>
+                        </li>
+                        <li><hr class="nb-dd-divider" /></li>
+                        <li>
+                            <form asp-controller="Account" asp-action="Logout" method="post" style="margin:0;">
+                                <button type="submit" class="nb-dd-logout">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </ul>
+            }
+
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════
+     4. MOBILE NAV (hamburger menu)
+     ══════════════════════════════ -->
+<div class="nb-mobile-nav" id="nb-mobile-nav">
+    <div class="container">
+
+        <!-- Mobile search -->
+        <div class="nb-search-mobile-wrap">
+            <div class="nb-search-mobile-inner">
+                <button class="nb-clear-btn" id="nb-clear-m" type="button">Clear</button>
+                <input class="nb-search-input-field" type="text" id="nb-search-m"
+                       placeholder="Search Product Name" autocomplete="off" />
+                <button class="nb-search-submit" type="button" id="nb-search-go-m">Search</button>
+            </div>
+        </div>
+
+        <!-- Mobile links -->
+        <a class="nb-nav-link" asp-controller="Shop" asp-action="Index">
+            <i class="bi bi-grid"></i> All Products
+        </a>
+        <a class="nb-nav-link" asp-controller="Home" asp-action="Index" asp-fragment="new-heading">
+            <i class="bi bi-stars"></i> New Arrivals
+        </a>
+        <a class="nb-nav-link" asp-controller="Home" asp-action="Index" asp-fragment="bestsellers-heading">
+            <i class="bi bi-trophy"></i> Best Sellers
+        </a>
+        <a class="nb-nav-link" asp-controller="Home" asp-action="Index" asp-fragment="promo-section">
+            <i class="bi bi-tag"></i> Sale &amp; Deals
+        </a>
+
+        @if (SignInManager.IsSignedIn(User))
+        {
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="nb-admin-link"
+                   asp-area="Admin"
+                   asp-controller="Dashboard"
+                   asp-action="Index">
+                    <i class="bi bi-gear-fill"></i> Admin
+                </a>
+            }
+
+            <div style="border-top:1px solid var(--nb-border);margin:6px 0;"></div>
+            <a class="nb-nav-link" asp-controller="Account" asp-action="Profile">
+                <i class="bi bi-person"></i> Profile
+            </a>
+            <a class="nb-nav-link" asp-controller="Order" asp-action="Index">
+                <i class="bi bi-receipt"></i> My Orders
+            </a>
+            <div style="padding: 4px 16px;">
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit"
+                            style="background:none;border:none;cursor:pointer;color:#f87171;
+                                       font-size:13px;font-family:inherit;display:flex;
+                                       align-items:center;gap:6px;padding:6px 0;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <a class="nb-nav-link" asp-controller="Account" asp-action="Login">
+                <i class="bi bi-person"></i> Login
+            </a>
+            <a class="nb-nav-link" asp-controller="Account" asp-action="Register">
+                Register
+            </a>
+        }
+
+    </div>
+</div>
+
+<script>
+    /* ── CART BADGE ── */
+    function setCartBadge(count) {
+        var el = document.getElementById('cart-count');
+        if (!el) return;
+        el.textContent = count;
+        el.style.display = count === 0 ? 'none' : 'flex';
+    }
+    window.setCartBadge = setCartBadge;
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        /* Cart count */
+        fetch('/Cart/Count')
+            .then(function (r) { return r.json(); })
+            .then(function (d) { setCartBadge(d.count || 0); })
+            .catch(function () {});
+
+        /* ── MOBILE HAMBURGER ── */
+        var toggler  = document.getElementById('nb-mob-toggler');
+        var mobileNav = document.getElementById('nb-mobile-nav');
+        if (toggler && mobileNav) {
+            toggler.addEventListener('click', function () {
+                mobileNav.classList.toggle('open');
+            });
+        }
+
+        /* ── USER DROPDOWN (desktop) ── */
+        var toggle = document.getElementById('nb-user-toggle');
+        var menu   = document.getElementById('nb-user-menu');
+        if (toggle && menu) {
+            toggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var isOpen = menu.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', isOpen);
+            });
+
+            /* Close on outside click */
+            document.addEventListener('click', function (e) {
+                if (!menu.contains(e.target) && e.target !== toggle) {
+                    menu.classList.remove('open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            /* Close on Escape */
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    menu.classList.remove('open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        /* ── SEARCH ── */
+        function wireSearch(inputId, clearId, btnId) {
+            var inp = document.getElementById(inputId);
+            var clr = document.getElementById(clearId);
+            var btn = document.getElementById(btnId);
+            if (!inp || !btn) return;
+
+            function doSearch() {
+                var q = inp.value.trim();
+                window.location.href = '/Shop?searchQuery=' + encodeURIComponent(q);
+            }
+
+            if (clr) clr.addEventListener('click', function () { inp.value = ''; inp.focus(); });
+            btn.addEventListener('click', doSearch);
+            inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+        }
+
+        wireSearch('nb-search',   'nb-clear',   'nb-search-go');
+        wireSearch('nb-search-m', 'nb-clear-m', 'nb-search-go-m');
+
+        /* ── ACTIVE LINK HIGHLIGHT ── */
+        var path = window.location.pathname.toLowerCase();
+        document.querySelectorAll('.nb-nav-link').forEach(function (a) {
+            var href = (a.getAttribute('href') || '').toLowerCase();
+            if (href && href !== '/' && path.startsWith(href.split('?')[0].split('#')[0])) {
+                a.classList.add('active-link');
+            }
+        });
+    });
+</script>

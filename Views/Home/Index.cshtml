@@ -1,0 +1,1749 @@
+@{
+    ViewData["Title"] = "Afaq Mart - Online Shopping in Pakistan | Electronics, Fashion & More";
+    ViewData["MetaDescription"] = "Shop 12,000+ products at Afaq Mart. Best prices on electronics, fashion, home & kitchen in Pakistan. ✓ Cash on Delivery ✓ 7-Day Returns ✓ Nationwide Delivery";
+    ViewData["MetaKeywords"] = "online shopping pakistan, buy electronics, fashion pakistan, afaq mart, home appliances, mobile phones, best prices pakistan";
+    ViewData["CanonicalUrl"] = "https://afaqmart.com/";
+    ViewData["OgImage"] = "https://afaqmart.com/images/og-home.jpg";
+
+    var featured = ViewBag.FeaturedProducts as List<ECommerceApp.Models.Product>;
+    var categories = ViewBag.Categories as List<ECommerceApp.Models.Category>;
+    var bestSellers = ViewBag.BestSellers as List<ECommerceApp.Models.Product>;
+    var newArrivals = ViewBag.NewArrivals as List<ECommerceApp.Models.Product>;
+}
+@{
+    const string CurrencySymbol = "$";
+    const string CurrencyCode = "USD";
+}
+@* ══════════════════════════════════════════════════════════════
+   SCHEMA.ORG — Organization + WebSite + WebPage
+   ══════════════════════════════════════════════════════════════ *@
+<script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@graph": [
+        {
+          "@@type": "Organization",
+          "@@id": "https://afaqmart.com/#organization",
+          "name": "Afaq Mart",
+          "url": "https://afaqmart.com",
+          "logo": {
+            "@@type": "ImageObject",
+            "url": "https://afaqmart.com/images/logo.png",
+            "width": 512,
+            "height": 512
+          },
+          "sameAs": [
+            "https://facebook.com/afaqmart",
+            "https://instagram.com/afaqmart",
+            "https://twitter.com/afaqmart"
+          ],
+          "contactPoint": {
+            "@@type": "ContactPoint",
+            "telephone": "+92-300-1234567",
+            "contactType": "customer service",
+            "availableLanguage": ["English", "Urdu"]
+          }
+        },
+        {
+          "@@type": "WebSite",
+          "@@id": "https://afaqmart.com/#website",
+          "name": "Afaq Mart",
+          "url": "https://afaqmart.com",
+          "publisher": { "@@id": "https://afaqmart.com/#organization" },
+          "potentialAction": {
+            "@@type": "SearchAction",
+            "target": {
+              "@@type": "EntryPoint",
+              "urlTemplate": "https://afaqmart.com/Shop?searchQuery={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@@type": "WebPage",
+          "@@id": "https://afaqmart.com/#webpage",
+          "url": "https://afaqmart.com/",
+          "name": "Afaq Mart - Online Shopping in Pakistan",
+          "isPartOf": { "@@id": "https://afaqmart.com/#website" },
+          "about": { "@@id": "https://afaqmart.com/#organization" },
+          "primaryImageOfPage": {
+            "@@type": "ImageObject",
+            "url": "https://afaqmart.com/images/og-home.jpg"
+          },
+          "description": "Pakistan's trusted online marketplace for electronics, fashion, and home essentials.",
+          "breadcrumb": {
+            "@@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@@type": "ListItem", "position": 1, "name": "Home", "item": "https://afaqmart.com/" }
+            ]
+          }
+        }
+      ]
+    }
+</script>
+
+@* ══════════════════════════════════════════════════════════════
+   SCHEMA.ORG — Featured Products ItemList (conditional)
+   ══════════════════════════════════════════════════════════════ *@
+@if (featured != null && featured.Any())
+{
+    <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "ItemList",
+          "name": "Featured Products at Afaq Mart",
+          "itemListElement": [
+            @for (int i = 0; i < featured.Count; i++)
+            {
+                                    var p = featured[i];
+                                    @:{ "@@type": "ListItem", "position": @(i + 1), "url": "https://afaqmart.com/Shop/Detail/@p.Id" }@(i < featured.Count - 1 ? "," : "")
+            }
+          ]
+        }
+    </script>
+}
+
+@* ══════════════════════════════════════════════════════════════
+   SCHEMA.ORG — FAQ Rich Snippet
+   ══════════════════════════════════════════════════════════════ *@
+<script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@@type": "Question",
+          "name": "What payment methods does Afaq Mart accept?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "We accept all major credit and debit cards. All payments are processed through secure, encrypted channels to ensure your information remains safe and protected."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "How long does delivery take in Pakistan?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "Delivery typically takes 2–3 business days for major cities and 4–6 business days for other locations. We provide real-time tracking for all orders."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "What is your return and exchange policy?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "We offer a hassle-free 7-day return policy. Products must be in original condition with all packaging."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "Do you deliver across Pakistan?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "Yes! We deliver nationwide across Pakistan."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "Do you offer free shipping?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "Yes. We offer free shipping on all orders above $100."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "Are taxes included in product prices?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "Taxes are calculated separately during checkout and displayed before payment."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "Can I track my order?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "Yes. Once your order is shipped, tracking information is provided so you can monitor delivery progress."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "What product categories do you offer?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "We offer electronics, fashion, home and kitchen products, beauty items, accessories, and many other categories."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "What currency are payments processed in?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "All prices and payments on Afaq Mart are processed in US Dollars (USD). The final amount is displayed during checkout before payment is completed."
+          }
+        },
+        {
+          "@@type": "Question",
+          "name": "Is customer support available all the time?",
+          "acceptedAnswer": {
+            "@@type": "Answer",
+            "text": "Yes. Our customer support team is available 24/7 to assist with orders, payments, returns, and product inquiries."
+          }
+        }
+      ]
+    }
+</script>
+
+@* ══════════════════════════════════════════════════════════════
+   CRITICAL CSS (above-the-fold — inlined for performance)
+   ══════════════════════════════════════════════════════════════ *@
+<style>
+    /* ── Design Tokens ─────────────────────────────── */
+    :root {
+        --am-ink: #0f172a;
+        --am-surface: #ffffff;
+        --am-page: #f8fafc;
+        --am-border: #e2e8f0;
+        --am-accent: #d97706;
+        --am-accent-lt: #fbbf24;
+        --am-green: #059669;
+        --am-red: #dc2626;
+        --am-muted: #64748b;
+        --am-r: 10px;
+        --am-r-lg: 16px;
+        --am-shadow: 0 4px 6px -1px rgb(0 0 0/.10);
+        --am-shadow-lg: 0 10px 15px -3px rgb(0 0 0/.10);
+        --font-head: 'Inter', system-ui, sans-serif;
+        --font-body: 'Inter', system-ui, sans-serif;
+    }
+
+    /* ── Smooth scroll for anchor links ───────────── */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* ── Offset for fixed navbar when scrolling to anchor ── */
+    [id] {
+        scroll-margin-top: 80px;
+    }
+
+    /* ── Accessibility ─────────────────────────────── */
+    .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--am-ink);
+        color: #fff;
+        padding: 8px 16px;
+        z-index: 10000;
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 0 0 8px 0;
+        transition: top .2s;
+    }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+    /* ── Announcement Bar ──────────────────────────── */
+    .am-ann {
+        background: var(--am-ink);
+        color: #fff;
+        text-align: center;
+        padding: .5rem 1rem;
+        font-size: .8rem;
+        font-weight: 500;
+        /* Prevent text overflow on very small screens */
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    @@media (max-width: 480px) {
+        .am-ann {
+            font-size: .72rem;
+            white-space: normal;
+            line-height: 1.5;
+        }
+    }
+
+    .am-ann a {
+        color: var(--am-accent-lt);
+        text-decoration: underline;
+    }
+
+    /* ── Hero ──────────────────────────────────────── */
+    .am-hero-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .am-hero-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .am-hero-main {
+        background: linear-gradient(135deg, var(--am-ink) 0%, #1e293b 100%);
+        border-radius: var(--am-r-lg);
+        padding: clamp(1.75rem,5vw,3.5rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        min-height: 340px;
+    }
+
+        .am-hero-main::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(217,119,6,.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+    .am-hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .75rem;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--am-accent-lt);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .am-hero-main h1 {
+        font-family: var(--font-head);
+        font-size: clamp(1.6rem,4.5vw,3rem);
+        line-height: 1.15;
+        color: #fff;
+        margin-bottom: 1rem;
+        font-weight: 800;
+        max-width: 480px;
+    }
+
+        .am-hero-main h1 em {
+            color: var(--am-accent-lt);
+            font-style: normal;
+            position: relative;
+        }
+
+            .am-hero-main h1 em::after {
+                content: '';
+                position: absolute;
+                bottom: 2px;
+                left: 0;
+                width: 100%;
+                height: 8px;
+                background: rgba(217,119,6,.3);
+                z-index: -1;
+                border-radius: 2px;
+            }
+
+    .am-hero-lead {
+        color: rgba(255,255,255,.65);
+        font-size: clamp(.85rem,2vw,1.05rem);
+        max-width: 420px;
+        margin-bottom: 1.75rem;
+        line-height: 1.7;
+    }
+
+    .am-hero-btns {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    @@media (max-width: 380px) {
+        .am-hero-btns {
+            flex-direction: column;
+        }
+
+            .am-hero-btns a {
+                width: 100%;
+                justify-content: center;
+            }
+    }
+
+    /* ── Buttons ───────────────────────────────────── */
+    .am-btn-primary {
+        background: var(--am-accent);
+        color: #fff;
+        border: none;
+        padding: .75rem 2rem;
+        border-radius: var(--am-r);
+        font-size: .92rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all .2s;
+        cursor: pointer;
+        /* Minimum tap target */
+        min-height: 44px;
+    }
+
+        .am-btn-primary:hover {
+            background: #b45309;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217,119,6,.3);
+        }
+
+    .am-btn-ghost {
+        background: rgba(255,255,255,.08);
+        color: rgba(255,255,255,.9);
+        border: 1px solid rgba(255,255,255,.2);
+        padding: .75rem 2rem;
+        border-radius: var(--am-r);
+        font-size: .92rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all .2s;
+        /* Minimum tap target */
+        min-height: 44px;
+    }
+
+        .am-btn-ghost:hover {
+            background: rgba(255,255,255,.15);
+            border-color: rgba(255,255,255,.4);
+            color: #fff;
+        }
+
+    /* ── Hero Side Cards ───────────────────────────── */
+    .am-hero-side {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    @@media (max-width: 768px) {
+        .am-hero-side {
+            grid-template-rows: unset;
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .am-hero-side {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .am-hero-card {
+        border-radius: var(--am-r-lg);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        transition: transform .3s, box-shadow .3s;
+        min-height: 140px;
+    }
+
+        .am-hero-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--am-shadow-lg);
+        }
+
+    .am-hero-card--accent {
+        background: linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);
+        color: var(--am-ink);
+    }
+
+    .am-hero-card--dark {
+        background: linear-gradient(135deg,#1e293b 0%,#334155 100%);
+        color: #fff;
+    }
+
+    .am-hero-card h3 {
+        font-size: clamp(1.1rem,2.5vw,1.35rem);
+        font-weight: 800;
+        margin-bottom: .5rem;
+        line-height: 1.2;
+    }
+
+    .am-hero-card p {
+        font-size: .85rem;
+        opacity: .8;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .am-hero-card .card-link {
+        font-size: .85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+    }
+
+    .am-hero-card--accent .card-link {
+        color: var(--am-accent);
+    }
+
+    .am-hero-card--dark .card-link {
+        color: var(--am-accent-lt);
+    }
+
+    .am-hero-card .card-icon {
+        position: absolute;
+        bottom: -10px;
+        right: -10px;
+        font-size: 5rem;
+        opacity: .15;
+        line-height: 1;
+    }
+
+    /* ── Trust Bar ─────────────────────────────────── */
+    .am-trust-bar {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+        padding: 1.25rem;
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r-lg);
+    }
+
+    @@media (max-width: 640px) {
+        .am-trust-bar {
+            grid-template-columns: repeat(2,1fr);
+        }
+    }
+
+    @@media (max-width: 360px) {
+        .am-trust-bar {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .am-trust-item {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .5rem;
+    }
+
+    .am-trust-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #f0fdf4;
+        color: var(--am-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .am-trust-item:nth-child(2) .am-trust-icon {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .am-trust-item:nth-child(3) .am-trust-icon {
+        background: #fef2f2;
+        color: var(--am-red);
+    }
+
+    .am-trust-item:nth-child(4) .am-trust-icon {
+        background: #fffbeb;
+        color: var(--am-accent);
+    }
+
+    .am-trust-text strong {
+        display: block;
+        font-size: .85rem;
+        color: var(--am-ink);
+        font-weight: 700;
+    }
+
+    .am-trust-text span {
+        font-size: .75rem;
+        color: var(--am-muted);
+    }
+
+    /* ── Section Shared ────────────────────────────── */
+    .am-section {
+        margin-bottom: 3rem;
+    }
+
+    .am-section-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+
+    .am-section-title {
+        font-family: var(--font-head);
+        font-size: clamp(1.1rem,3.5vw,1.6rem);
+        font-weight: 800;
+        color: var(--am-ink);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        flex-wrap: wrap;
+    }
+
+        .am-section-title .badge {
+            font-size: .65rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+    .am-see-all {
+        font-size: .85rem;
+        color: var(--am-accent);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: gap .2s;
+        /* Minimum tap target */
+        padding: 4px 0;
+        min-height: 44px;
+        align-items: center;
+    }
+
+        .am-see-all:hover {
+            gap: 8px;
+            text-decoration: underline;
+        }
+
+    /* ── Category Grid ─────────────────────────────── */
+    .am-cat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+        gap: 1rem;
+    }
+
+    @@media (max-width: 480px) {
+        .am-cat-grid {
+            grid-template-columns: repeat(2,1fr);
+            gap: .75rem;
+        }
+    }
+
+    .am-cat-card {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r-lg);
+        padding: 1.25rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: var(--am-ink);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all .25s;
+        position: relative;
+        overflow: hidden;
+        /* Minimum tap target */
+        min-height: 100px;
+    }
+
+        .am-cat-card:hover {
+            box-shadow: var(--am-shadow-lg);
+            transform: translateY(-4px);
+            border-color: var(--am-accent);
+        }
+
+    .am-cat-icon-wrap {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: #fff7ed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        margin-bottom: .75rem;
+        transition: transform .3s;
+    }
+
+    .am-cat-card:hover .am-cat-icon-wrap {
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    .am-cat-name {
+        font-size: .88rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+    }
+
+    .am-cat-count {
+        font-size: .72rem;
+        color: var(--am-muted);
+        font-weight: 500;
+    }
+
+    /* ── Product Grid ──────────────────────────────── */
+    .am-prod-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+        gap: 1.25rem;
+    }
+
+    @@media (max-width: 640px) {
+        .am-prod-grid {
+            grid-template-columns: repeat(2,1fr);
+            gap: .75rem;
+        }
+    }
+
+    @@media (max-width: 360px) {
+        .am-prod-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .am-prod-card {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: all .25s;
+        position: relative;
+    }
+
+        .am-prod-card:hover {
+            box-shadow: var(--am-shadow-lg);
+            transform: translateY(-4px);
+            border-color: #cbd5e1;
+        }
+
+    /* Badge */
+    .am-prod-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        font-size: .65rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .am-prod-badge--sale {
+        background: var(--am-red);
+        color: #fff;
+    }
+
+    .am-prod-badge--new {
+        background: var(--am-green);
+        color: #fff;
+    }
+
+    .am-prod-badge--bestseller {
+        background: var(--am-accent);
+        color: #fff;
+    }
+
+    /* Image */
+    .am-prod-img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--am-border);
+        position: relative;
+    }
+
+        .am-prod-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 12px;
+            transition: transform .4s;
+        }
+
+    .am-prod-card:hover .am-prod-img img {
+        transform: scale(1.05);
+    }
+
+    .am-prod-img-placeholder {
+        font-size: 3rem;
+        color: #cbd5e1;
+    }
+
+    /* Body */
+    .am-prod-body {
+        padding: .875rem;
+        flex: 1;
+    }
+
+    @@media (max-width: 640px) {
+        .am-prod-body {
+            padding: .75rem;
+        }
+    }
+
+    .am-prod-brand {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--am-muted);
+        margin-bottom: 4px;
+    }
+
+    .am-prod-name {
+        font-size: .88rem;
+        font-weight: 700;
+        color: var(--am-ink);
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+        min-height: 2.4em;
+    }
+
+    @@media (max-width: 640px) {
+        .am-prod-name {
+            font-size: .82rem;
+        }
+    }
+
+    .am-prod-rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+
+    .am-prod-stars {
+        color: #fbbf24;
+        font-size: .8rem;
+        letter-spacing: -1px;
+    }
+
+    .am-prod-reviews {
+        font-size: .72rem;
+        color: var(--am-muted);
+    }
+
+    .am-prod-prices {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .am-prod-price {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--am-green);
+    }
+
+    .am-prod-orig {
+        font-size: .78rem;
+        color: var(--am-muted);
+        text-decoration: line-through;
+    }
+
+    .am-prod-disc {
+        font-size: .68rem;
+        font-weight: 700;
+        background: #fef2f2;
+        color: var(--am-red);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* Footer */
+    .am-prod-footer {
+        padding: .625rem;
+        display: flex;
+        gap: 6px;
+        border-top: 1px solid var(--am-border);
+        background: #fafafa;
+    }
+
+        .am-prod-footer .btn {
+            flex: 1;
+            font-size: .78rem;
+            padding: .5rem .375rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all .2s;
+            /* Minimum tap target height */
+            min-height: 40px;
+        }
+
+        .am-prod-footer .btn-outline-dark {
+            border: 1.5px solid var(--am-border);
+            background: #fff;
+            color: var(--am-ink);
+        }
+
+            .am-prod-footer .btn-outline-dark:hover {
+                border-color: var(--am-ink);
+                background: var(--am-ink);
+                color: #fff;
+            }
+
+        .am-prod-footer .btn-dark {
+            background: var(--am-ink);
+            border: none;
+            color: #fff;
+        }
+
+            .am-prod-footer .btn-dark:hover {
+                background: var(--am-accent);
+            }
+
+        .am-prod-footer .btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+    @@media (max-width: 360px) {
+        .am-prod-footer {
+            flex-direction: column;
+        }
+    }
+
+    /* ── Star Rating Helper ─────────────────────────── */
+    .am-stars-wrap {
+        display: inline-flex;
+        gap: 1px;
+        font-size: .8rem;
+    }
+
+    .am-star-full {
+        color: #fbbf24;
+    }
+
+    .am-star-half {
+        color: #fbbf24;
+    }
+
+    .am-star-empty {
+        color: #cbd5e1;
+    }
+
+    /* ── Flash Sale Banner ──────────────────────────── */
+    .am-promo {
+        background: linear-gradient(135deg, var(--am-ink) 0%, #1e293b 50%, #334155 100%);
+        border-radius: var(--am-r-lg);
+        padding: clamp(1.75rem,5vw,3rem) clamp(1.25rem,4vw,3rem);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .am-promo::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(217,119,6,.2) 0%, transparent 70%);
+        }
+
+    .am-promo-content {
+        position: relative;
+        z-index: 1;
+        max-width: 520px;
+    }
+
+    .am-promo h2 {
+        font-family: var(--font-head);
+        font-size: clamp(1.3rem,4vw,2.2rem);
+        color: #fff;
+        font-weight: 800;
+        margin-bottom: .75rem;
+        line-height: 1.2;
+    }
+
+        .am-promo h2 em {
+            color: var(--am-accent-lt);
+            font-style: normal;
+        }
+
+    .am-promo p {
+        color: rgba(255,255,255,.6);
+        font-size: .95rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .am-promo-icon {
+        font-size: clamp(4rem,8vw,7rem);
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0)
+        }
+
+        50% {
+            transform: translateY(-10px)
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .am-promo {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .am-promo-icon {
+            display: none;
+        }
+
+        .am-promo .am-btn-primary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ── Editorial / SEO Content ───────────────────── */
+    .am-editorial {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r-lg);
+        padding: clamp(1.25rem,4vw,2.5rem);
+        margin-bottom: 3rem;
+    }
+
+        .am-editorial h2 {
+            font-size: clamp(1.1rem,3vw,1.4rem);
+            font-weight: 800;
+            color: var(--am-ink);
+            margin-bottom: 1rem;
+        }
+
+        .am-editorial p {
+            color: #475569;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            font-size: .95rem;
+        }
+
+    .am-editorial-grid {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .am-editorial-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+    .am-editorial-card {
+        padding: 1.25rem;
+        background: var(--am-page);
+        border-radius: var(--am-r);
+        border-left: 3px solid var(--am-accent);
+    }
+
+        .am-editorial-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: .5rem;
+            color: var(--am-ink);
+        }
+
+        .am-editorial-card p {
+            font-size: .85rem;
+            color: var(--am-muted);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+    /* ── FAQ ───────────────────────────────────────── */
+    .am-faq {
+        margin-bottom: 3rem;
+    }
+
+    .am-faq-item {
+        background: var(--am-surface);
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r);
+        margin-bottom: .75rem;
+        overflow: hidden;
+    }
+
+    .am-faq-question {
+        padding: 1rem 1.25rem;
+        font-weight: 700;
+        font-size: .93rem;
+        color: var(--am-ink);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        /* Better tap target */
+        min-height: 52px;
+        line-height: 1.4;
+    }
+
+        .am-faq-question::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--am-accent);
+            transition: transform .2s;
+            flex-shrink: 0;
+            margin-left: .75rem;
+        }
+
+    .am-faq-item[open] .am-faq-question::after {
+        transform: rotate(45deg);
+    }
+
+    .am-faq-answer {
+        padding: 0 1.25rem 1rem;
+        color: #475569;
+        font-size: .9rem;
+        line-height: 1.7;
+    }
+
+    /* ── Toast ─────────────────────────────────────── */
+    #cart-toast-container {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        /* Full-width on very small screens */
+        max-width: calc(100vw - 2rem);
+    }
+
+    @@media (max-width: 480px) {
+        #cart-toast-container {
+            left: 1rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+    }
+
+    /* ── Reduced Motion ────────────────────────────── */
+    @@media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: .01ms !important;
+            transition-duration: .01ms !important;
+        }
+    }
+</style>
+
+@* ── Announcement Bar ──────────────────────────────────────────── *@
+<div class="am-ann" role="banner">
+    🚚 Fast Delivery Across Pakistan &nbsp;|&nbsp; Free Shipping on Orders Over $100;
+    <a href="/#promo-section">Flash Sale: Up to 50% Off Electronics →</a>
+</div>
+
+@* ── Spacer after announcement bar ────────────────────────────── *@
+<br />
+
+@* ══════════════════════════════════════════════════════════════
+   PAGE BODY — _Layout already wraps this in <main id="main-content">
+   ══════════════════════════════════════════════════════════════ *@
+<div class="am-home-wrap">
+
+    @* ── 1. HERO ─────────────────────────────────────────────── *@
+    <section class="am-hero-grid" aria-label="Featured promotions">
+        <div class="am-hero-main">
+            <p class="am-hero-eyebrow"><span aria-hidden="true">🔥</span> New arrivals every week</p>
+            <h1>Shop <em>Smart,</em><br>Live Better</h1>
+            <p class="am-hero-lead">
+                Discover 12,000+ quality products at unbeatable prices.
+                Fast delivery across Pakistan with cash on delivery.
+            </p>
+            <div class="am-hero-btns">
+                <a asp-controller="Shop" asp-action="Index" class="am-btn-primary">
+                    <i class="bi bi-bag" aria-hidden="true"></i> Start Shopping
+                </a>
+                <a href="/#promo-section" class="am-btn-ghost">
+                    <i class="bi bi-lightning-charge" aria-hidden="true"></i> Today's Deals
+                </a>
+            </div>
+        </div>
+        <div class="am-hero-side">
+            <a href="/Shop?category=fashion" class="am-hero-card am-hero-card--accent">
+                <div>
+                    <h3>Summer Fashion</h3>
+                    <p>Up to 40% off on trending styles this season</p>
+                    <span class="card-link">Explore Collection <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+                </div>
+                <span class="card-icon" aria-hidden="true">👕</span>
+            </a>
+            <a href="/Shop?category=electronics" class="am-hero-card am-hero-card--dark">
+                <div>
+                    <h3>Tech Essentials</h3>
+                    <p>Latest gadgets and accessories at best prices</p>
+                    <span class="card-link">Shop Now <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+                </div>
+                <span class="card-icon" aria-hidden="true">📱</span>
+            </a>
+        </div>
+    </section>
+
+    @* ── 2. TRUST BAR ─────────────────────────────────────────── *@
+    <section class="am-trust-bar" aria-label="Why shop with us">
+        <div class="am-trust-item">
+            <div class="am-trust-icon"><i class="bi bi-truck" aria-hidden="true"></i></div>
+            <div class="am-trust-text"><strong>Fast Shipping</strong><span>Across Pakistan</span></div>
+        </div>
+        <div class="am-trust-item">
+            <div class="am-trust-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></div>
+            <div class="am-trust-text"><strong>Secure Payment</strong><span>100% secure checkout</span></div>
+        </div>
+        <div class="am-trust-item">
+            <div class="am-trust-icon"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></div>
+            <div class="am-trust-text"><strong>7-Day Returns</strong><span>Hassle-free return policy</span></div>
+        </div>
+        <div class="am-trust-item">
+            <div class="am-trust-icon"><i class="bi bi-headset" aria-hidden="true"></i></div>
+            <div class="am-trust-text"><strong>24/7 Support</strong><span>Dedicated help center</span></div>
+        </div>
+    </section>
+
+    @* ── 3. CATEGORIES ────────────────────────────────────────── *@
+    @if (categories != null && categories.Any())
+    {
+        <section class="am-section" aria-labelledby="cat-heading">
+            <div class="am-section-header">
+                <h2 class="am-section-title" id="cat-heading">
+                    <i class="bi bi-grid-3x3-gap" style="color:var(--am-accent);" aria-hidden="true"></i>
+                    Shop by Category
+                </h2>
+                <a asp-controller="Shop" asp-action="Index" class="am-see-all">
+                    Browse All <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <nav class="am-cat-grid" aria-label="Product categories">
+                @foreach (var cat in categories.Take(8))
+                {
+                    <a asp-controller="Shop" asp-action="Index"
+                       asp-route-categoryId="@cat.Id"
+                       class="am-cat-card"
+                       title="Browse @cat.Name at Afaq Mart">
+                        <span class="am-cat-icon-wrap" aria-hidden="true">🏷️</span>
+                        <span class="am-cat-name">@cat.Name</span>
+                        <span class="am-cat-count">@cat.Products.Count items</span>
+                    </a>
+                }
+            </nav>
+        </section>
+    }
+
+    @* ── 4. FEATURED PRODUCTS ─────────────────────────────────── *@
+    @if (featured != null && featured.Any())
+    {
+        <section class="am-section" aria-labelledby="featured-heading">
+            <div class="am-section-header">
+                <h2 class="am-section-title" id="featured-heading">
+                    Featured Products
+                    <span class="badge bg-success">Top Picks</span>
+                </h2>
+                <a asp-controller="Shop" asp-action="Index" class="am-see-all">
+                    View All <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="am-prod-grid">
+                @foreach (var p in featured.Take(8))
+                {
+                    var detailUrl = Url.Action("Detail", "Shop", new { id = p.Id });
+                    var totalReviews = p.Reviews?.Count ?? 0;
+                    var computedRating = totalReviews > 0 ? p.Reviews.Average(r => r.Rating) : p.Rating;
+
+                    <article class="am-prod-card" itemscope itemtype="https://schema.org/Product">
+                        @if (p.OriginalPrice.HasValue)
+                        {
+                            <span class="am-prod-badge am-prod-badge--sale">Sale</span>
+                        }
+                        <div class="am-prod-img">
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl"
+                                     alt="@p.Name – @p.Brand"
+                                     loading="lazy" width="300" height="300"
+                                     itemprop="image" />
+                            }
+                            else
+                            {
+                                <span class="am-prod-img-placeholder" aria-hidden="true">📦</span>
+                            }
+                        </div>
+                        <div class="am-prod-body">
+                            <p class="am-prod-brand" itemprop="brand">@p.Brand</p>
+                            <h3 class="am-prod-name" itemprop="name">
+                                <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                                   style="text-decoration:none;color:inherit;">@p.Name</a>
+                            </h3>
+                            <div class="am-prod-rating" aria-label="Rated @computedRating.ToString("0.0") out of 5 — @totalReviews reviews">
+                                <span class="am-stars-wrap" aria-hidden="true">
+                                    @RenderStars(computedRating)
+                                </span>
+                                <span class="am-prod-reviews">(@totalReviews)</span>
+                            </div>
+                            <div class="am-prod-prices" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                <meta itemprop="priceCurrency" content="USD" />
+                                <meta itemprop="price" content="@p.Price" />
+                                <meta itemprop="availability" content="@(p.StockQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")" />
+                                <meta itemprop="url" content="https://afaqmart.com/Shop/Detail/@p.Id" />
+                                <span class="am-prod-price">$ @p.Price.ToString("F2")</span>
+                                @if (p.OriginalPrice.HasValue)
+                                {
+                                    <span class="am-prod-orig">$ @p.OriginalPrice.Value.ToString("F2")</span>
+                                    <span class="am-prod-disc">-@p.DiscountPercentage%</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="am-prod-footer">
+                            <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                               class="btn btn-outline-dark btn-sm">Details</a>
+                            @if (p.StockQuantity > 0)
+                            {
+                                <button class="btn btn-dark btn-sm btn-add-cart"
+                                        data-product-id="@p.Id"
+                                        aria-label="Add @p.Name to cart">
+                                    <i class="bi bi-cart-plus" aria-hidden="true"></i> Add
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-sm" disabled>Out of Stock</button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    @* ── 5. BEST SELLERS ──────────────────────────────────────── *@
+    @if (bestSellers != null && bestSellers.Any())
+    {
+        <section class="am-section" aria-labelledby="bestsellers-heading">
+            <div class="am-section-header">
+                <h2 class="am-section-title" id="bestsellers-heading">
+                    Best Sellers
+                    <span class="badge bg-warning text-dark">Hot</span>
+                </h2>
+                <a asp-controller="Shop" asp-action="Index" asp-route-sort="bestselling" class="am-see-all">
+                    View All <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="am-prod-grid">
+                @foreach (var p in bestSellers.Take(4))
+                {
+                    var detailUrl = Url.Action("Detail", "Shop", new { id = p.Id });
+                    var totalReviews = p.Reviews?.Count ?? 0;
+                    var computedRating = totalReviews > 0 ? p.Reviews.Average(r => r.Rating) : p.Rating;
+
+                    <article class="am-prod-card" itemscope itemtype="https://schema.org/Product">
+                        <span class="am-prod-badge am-prod-badge--bestseller">Best Seller</span>
+                        <div class="am-prod-img">
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl"
+                                     alt="@p.Name – @p.Brand"
+                                     loading="lazy" width="300" height="300"
+                                     itemprop="image" />
+                            }
+                            else
+                            {
+                                <span class="am-prod-img-placeholder" aria-hidden="true">📦</span>
+                            }
+                        </div>
+                        <div class="am-prod-body">
+                            <p class="am-prod-brand" itemprop="brand">@p.Brand</p>
+                            <h3 class="am-prod-name" itemprop="name">
+                                <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                                   style="text-decoration:none;color:inherit;">@p.Name</a>
+                            </h3>
+                            <div class="am-prod-rating" aria-label="Rated @computedRating.ToString("0.0") out of 5 — @totalReviews reviews">
+                                <span class="am-stars-wrap" aria-hidden="true">
+                                    @RenderStars(computedRating)
+                                </span>
+                                <span class="am-prod-reviews">(@totalReviews)</span>
+                            </div>
+                            <div class="am-prod-prices" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                <meta itemprop="priceCurrency" content="USD" />
+                                <meta itemprop="price" content="@p.Price" />
+                                <meta itemprop="availability" content="https://schema.org/InStock" />
+                                <span class="am-prod-price">$ @p.Price.ToString("F2")</span>
+                                @if (p.OriginalPrice.HasValue)
+                                {
+                                    <span class="am-prod-orig">$ @p.OriginalPrice.Value.ToString("F2")</span>
+                                    <span class="am-prod-disc">-@p.DiscountPercentage%</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="am-prod-footer">
+                            <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                               class="btn btn-outline-dark btn-sm">Details</a>
+                            <button class="btn btn-dark btn-sm btn-add-cart"
+                                    data-product-id="@p.Id"
+                                    aria-label="Add @p.Name to cart">
+                                <i class="bi bi-cart-plus" aria-hidden="true"></i> Add
+                            </button>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    @* ── 7. NEW ARRIVALS ──────────────────────────────────────── *@
+    @if (newArrivals != null && newArrivals.Any())
+    {
+        <section class="am-section" aria-labelledby="new-heading">
+            <div class="am-section-header">
+                <h2 class="am-section-title" id="new-heading">
+                    New Arrivals
+                    <span class="badge bg-info">Just In</span>
+                </h2>
+                <a asp-controller="Shop" asp-action="Index" asp-route-sort="newest" class="am-see-all">
+                    View All <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+            <div class="am-prod-grid">
+                @foreach (var p in newArrivals.Take(4))
+                {
+                    var detailUrl = Url.Action("Detail", "Shop", new { id = p.Id });
+                    var totalReviews = p.Reviews?.Count ?? 0;
+                    var computedRating = totalReviews > 0 ? p.Reviews.Average(r => r.Rating) : p.Rating;
+
+                    <article class="am-prod-card" itemscope itemtype="https://schema.org/Product">
+                        <span class="am-prod-badge am-prod-badge--new">New</span>
+                        <div class="am-prod-img">
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl"
+                                     alt="@p.Name – @p.Brand"
+                                     loading="lazy" width="300" height="300"
+                                     itemprop="image" />
+                            }
+                            else
+                            {
+                                <span class="am-prod-img-placeholder" aria-hidden="true">📦</span>
+                            }
+                        </div>
+                        <div class="am-prod-body">
+                            <p class="am-prod-brand" itemprop="brand">@p.Brand</p>
+                            <h3 class="am-prod-name" itemprop="name">
+                                <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                                   style="text-decoration:none;color:inherit;">@p.Name</a>
+                            </h3>
+                            <div class="am-prod-rating" aria-label="Rated @computedRating.ToString("0.0") out of 5 — @totalReviews reviews">
+                                <span class="am-stars-wrap" aria-hidden="true">
+                                    @RenderStars(computedRating)
+                                </span>
+                                <span class="am-prod-reviews">(@totalReviews)</span>
+                            </div>
+                            <div class="am-prod-prices" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                <meta itemprop="priceCurrency" content="USD" />
+                                <meta itemprop="price" content="@p.Price" />
+                                <meta itemprop="availability" content="https://schema.org/InStock" />
+                                <span class="am-prod-price">$ @p.Price.ToString("F2")</span>
+                                @if (p.OriginalPrice.HasValue)
+                                {
+                                    <span class="am-prod-orig">$ @p.OriginalPrice.Value.ToString("F2")</span>
+                                    <span class="am-prod-disc">-@p.DiscountPercentage%</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="am-prod-footer">
+                            <a asp-controller="Shop" asp-action="Detail" asp-route-id="@p.Id"
+                               class="btn btn-outline-dark btn-sm">Details</a>
+                            <button class="btn btn-dark btn-sm btn-add-cart"
+                                    data-product-id="@p.Id"
+                                    aria-label="Add @p.Name to cart">
+                                <i class="bi bi-cart-plus" aria-hidden="true"></i> Add
+                            </button>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    @* ── 6. FLASH SALE BANNER ────────────────────────────────── *@
+    <section id="promo-section" class="am-promo" aria-label="Flash sale promotion">
+        <div class="am-promo-content">
+            <h2>Flash Sale: Up to <em>50% Off</em> Electronics</h2>
+            <p>
+                Limited-time offer on smartphones, laptops, and accessories.
+                Don't miss these unbeatable deals — available while stock lasts.
+            </p>
+            <a asp-controller="Shop" asp-action="Index" asp-route-sale="true" class="am-btn-primary">
+                <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> Shop the Sale
+            </a>
+        </div>
+        <div class="am-promo-icon" aria-hidden="true">⚡</div>
+    </section>
+
+    @* ── 8. SEO EDITORIAL CONTENT ─────────────────────────────── *@
+    <section class="am-editorial" aria-labelledby="about-heading">
+        <h2 id="about-heading">Why Afaq Mart is Pakistan's Favorite Online Store</h2>
+        <p>
+            Welcome to <strong>Afaq Mart</strong>, your one-stop destination for online shopping in Pakistan.
+            We bring you a curated collection of over <strong>12,000 products</strong> across electronics,
+            fashion, home &amp; kitchen, beauty, and more — all at competitive prices with the convenience
+            of <strong>cash on delivery</strong>.
+        </p>
+        <p>
+            Whether you're looking for the latest smartphones, trendy outfits, or essential home appliances,
+            Afaq Mart ensures a seamless shopping experience with fast delivery across all major cities
+            including Karachi, Lahore, Islamabad, and beyond.
+        </p>
+        <div class="am-editorial-grid">
+            <div class="am-editorial-card">
+                <h4>🛡️ Authentic Products</h4>
+                <p>Every product is sourced from authorized distributors with full warranty coverage.</p>
+            </div>
+            <div class="am-editorial-card">
+                <h4>💰 Best Price Guarantee</h4>
+                <p>We match prices to ensure you always get the best deal on every purchase.</p>
+            </div>
+            <div class="am-editorial-card">
+                <h4>🚚 Fast Nationwide Delivery</h4>
+                <p>2–5 day delivery to all major cities with real-time tracking on every order.</p>
+            </div>
+        </div>
+    </section>
+
+    @* ── 9. FAQ (Rich Snippet — display only, JSON-LD above) ───── *@
+    <section class="am-faq" aria-labelledby="faq-heading">
+        <div class="am-section-header">
+            <h2 class="am-section-title" id="faq-heading">
+                <i class="bi bi-question-circle" style="color:var(--am-accent);" aria-hidden="true"></i>
+                Frequently Asked Questions
+            </h2>
+        </div>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">What payment methods does Afaq Mart accept?</summary>
+            <div class="am-faq-answer">
+                <p>We accept all major credit and debit cards. All payments are processed through secure, encrypted channels to ensure your information remains safe and protected.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">How long does delivery take in Pakistan?</summary>
+            <div class="am-faq-answer">
+                <p>Delivery typically takes 2–3 business days for major cities (Karachi, Lahore, Islamabad, Rawalpindi) and 4–6 business days for other locations. We provide real-time tracking for all orders.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">What is your return and exchange policy?</summary>
+            <div class="am-faq-answer">
+                <p>We offer a hassle-free 7-day return policy. If you're not satisfied, simply initiate a return through your account dashboard or contact our support team. Products must be in original condition with all packaging.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">Do you deliver across Pakistan?</summary>
+            <div class="am-faq-answer">
+                <p>Yes! We deliver nationwide across Pakistan. Shipping charges are calculated and displayed during checkout.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">Do you offer free shipping?</summary>
+            <div class="am-faq-answer">
+                <p>Yes! We offer free shipping on all orders above $100. Shipping charges for smaller orders are calculated during checkout.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">Are taxes included in product prices?</summary>
+            <div class="am-faq-answer">
+                <p>Taxes are calculated separately during checkout and are clearly displayed before payment.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">Can I track my order?</summary>
+            <div class="am-faq-answer">
+                <p>Yes. Once your order is shipped, you will receive tracking information to monitor your delivery status.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">What product categories do you offer?</summary>
+            <div class="am-faq-answer">
+                <p>We offer electronics, fashion, home & kitchen, beauty products, accessories, and many more categories.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">Is customer support available all the time?</summary>
+            <div class="am-faq-answer">
+                <p>Our support team is available 24/7 to help with orders, returns, payments, and product inquiries.</p>
+            </div>
+        </details>
+        <details class="am-faq-item">
+            <summary class="am-faq-question">What currency are payments processed in?</summary>
+            <div class="am-faq-answer">
+                <p>All prices and payments on Afaq Mart are processed in US Dollars (USD). The final amount is displayed during checkout before payment is completed.</p>
+            </div>
+        </details>
+    </section>
+
+</div>@* /.am-home-wrap *@
+
+@* ── Toast container ──────────────────────────────────────────── *@
+<div id="cart-toast-container" aria-live="polite" aria-atomic="true"></div>
+
+@* ══════════════════════════════════════════════════════════════
+   RAZOR HELPER — Renders star icons from a double rating (0–5)
+   Uses half-star logic: e.g. 4.3 → 4 full + 1 half + 0 empty
+   ══════════════════════════════════════════════════════════════ *@
+@functions {
+    Microsoft.AspNetCore.Html.IHtmlContent RenderStars(double rating)
+    {
+        var sb = new System.Text.StringBuilder();
+        int full = (int)Math.Floor(rating);
+        bool half = (rating - full) >= 0.25 && (rating - full) < 0.75;
+
+        if ((rating - full) >= 0.75)
+        {
+            full++;
+            half = false;
+        }
+
+        int empty = 5 - full - (half ? 1 : 0);
+
+        for (int i = 0; i < full; i++)
+            sb.Append("<span class='am-star-full'>★</span>");
+
+        if (half)
+            sb.Append("<span class='am-star-half'>½</span>");
+
+        for (int i = 0; i < empty; i++)
+            sb.Append("<span class='am-star-empty'>☆</span>");
+
+        return new Microsoft.AspNetCore.Html.HtmlString(sb.ToString());
+    }
+}
+
+@section Scripts {
+    <script>
+        // ── Add to Cart ────────────────────────────────────────────────
+        function attachAddToCart() {
+            document.querySelectorAll('.btn-add-cart').forEach(function (btn) {
+                if (btn.dataset.bound) return;
+                btn.dataset.bound = 'true';
+
+                btn.addEventListener('click', async function () {
+                    const productId    = this.dataset.productId;
+                    const originalHTML = this.innerHTML;
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+
+                    try {
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                        const res   = await fetch('/Cart/Add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                ...(token ? { 'RequestVerificationToken': token } : {})
+                            },
+                            body: `productId=${encodeURIComponent(productId)}&quantity=1`
+                        });
+
+                        if (!res.ok) throw new Error('Network error');
+                        const data = await res.json();
+
+                        if (data.success) {
+                            if (window.setCartBadge) window.setCartBadge(data.count || 0);
+                            showToast('✓ Added to cart successfully!', 'success');
+                            this.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i> Added';
+                            setTimeout(() => { this.innerHTML = originalHTML; this.disabled = false; }, 2000);
+                        } else {
+                            showToast(data.message || 'Could not add item to cart.', 'danger');
+                            this.innerHTML = originalHTML;
+                            this.disabled  = false;
+                        }
+                    } catch {
+                        showToast('Something went wrong. Please try again.', 'danger');
+                        this.innerHTML = originalHTML;
+                        this.disabled  = false;
+                    }
+                });
+            });
+        }
+
+        // ── Toast notifications ────────────────────────────────────────
+        function showToast(message, type) {
+            const container = document.getElementById('cart-toast-container');
+            const icon      = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill';
+            const toast     = document.createElement('div');
+
+            toast.className  = `alert alert-${type} shadow-sm py-2 px-3 mb-0 d-flex align-items-center gap-2`;
+            toast.style.cssText = 'min-width:260px;font-size:.9rem;border-radius:12px;border:none;animation:_toastIn .3s ease;';
+            toast.innerHTML  = `<i class="bi ${icon}" aria-hidden="true"></i><span>${message}</span>`;
+
+            if (!document.getElementById('_toast-style')) {
+                const s = document.createElement('style');
+                s.id = '_toast-style';
+                s.textContent = '@@keyframes _toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}';
+                document.head.appendChild(s);
+            }
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.cssText += 'opacity:0;transition:opacity .3s;';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ── Init ───────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', attachAddToCart);
+    </script>
+}

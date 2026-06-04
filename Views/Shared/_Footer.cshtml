@@ -1,0 +1,207 @@
+<style>
+    /* ═══════════ FOOTER ═══════════ */
+    .am-footer {
+        background: var(--am-ink);
+        color: rgba(255,255,255,0.55);
+        margin-top: auto;
+        padding: 2rem 0 0;
+        font-size: 0.875rem;
+    }
+
+    .am-footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 2rem;
+        padding-bottom: 1.75rem;
+    }
+
+    @@media (max-width: 767px) {
+        .am-footer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .am-footer-grid {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+    }
+
+    .am-footer-brand {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+        .am-footer-brand em {
+            color: var(--am-accent);
+            font-style: normal;
+        }
+
+    .am-footer-tagline {
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.42);
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .am-footer-heading {
+        font-family: var(--font-body);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.35);
+        margin-bottom: 0.75rem;
+    }
+
+    .am-footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+        .am-footer-links a {
+            color: rgba(255,255,255,0.55);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.15s;
+            /* Larger tap target on mobile */
+            display: inline-block;
+            padding: 2px 0;
+        }
+
+            .am-footer-links a:hover,
+            .am-footer-links a:focus {
+                color: #fff;
+                outline: none;
+            }
+
+    .am-footer-bottom {
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 1rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        font-size: 0.78rem;
+    }
+
+        .am-footer-bottom a {
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+        }
+
+            .am-footer-bottom a:hover {
+                color: rgba(255,255,255,0.7);
+            }
+
+    .am-payment-icons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+        .am-payment-icons span {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.7rem;
+            font-weight: 600;
+            border-radius: 4px;
+            padding: 3px 7px;
+            letter-spacing: 0.03em;
+        }
+
+    /* Mobile: stack bottom-bar items */
+    @@media (max-width: 480px) {
+        .am-footer-bottom {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+            .am-footer-bottom .d-flex {
+                flex-wrap: wrap;
+                gap: 0.5rem !important;
+            }
+    }
+</style>
+
+<footer class="am-footer" role="contentinfo" itemscope itemtype="https://schema.org/WPFooter">
+    <div class="container">
+        <div class="am-footer-grid">
+
+            <!-- Brand column -->
+            <div>
+                <span class="am-footer-brand">Afaq<em>Mart</em></span>
+                <p class="am-footer-tagline">
+                    Your trusted online marketplace in Pakistan. Quality products, secure payments, and fast delivery.
+                </p>
+            </div>
+
+            <!-- Shop column -->
+            <div>
+                <p class="am-footer-heading">Shop</p>
+                <ul class="am-footer-links">
+                    <li><a asp-controller="Shop" asp-action="Index">All Products</a></li>
+                    <li>
+                        <a href="/#new-heading">New Arrivals</a>
+                    </li>
+                    <li>
+                        <a href="/#bestsellers-heading">Best Sellers</a>
+                    </li>
+                    <li>
+                        <a href="/#promo-section">Sale &amp; Deals</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Help column -->
+            <div>
+                <p class="am-footer-heading">Help</p>
+                <ul class="am-footer-links">
+                    <li><a href="/#faq-heading">FAQ</a></li>
+                    <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Account column -->
+            <div>
+                <p class="am-footer-heading">Account</p>
+                <ul class="am-footer-links">
+                    <li><a asp-controller="Account" asp-action="Login">Login</a></li>
+                    <li><a asp-controller="Account" asp-action="Register">Register</a></li>
+                    <li><a asp-controller="Account" asp-action="Profile">My Profile</a></li>
+                    <li><a asp-controller="Order" asp-action="Index">My Orders</a></li>
+                    <li><a asp-controller="Cart" asp-action="Index">My Cart</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="am-footer-bottom">
+            <span>&copy; @DateTime.Now.Year Afaq Mart. All rights reserved.</span>
+            <div class="d-flex gap-3">
+                <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                <a asp-controller="Home" asp-action="Terms">Terms of Service</a>
+                <a asp-controller="Home" asp-action="Cookie">Cookie Policy</a>
+            </div>
+            <div class="am-payment-icons" aria-label="Accepted payment methods">
+                <span>VISA</span>
+                <span>MC</span>
+                <span>JCB</span>
+                <span>COD</span>
+            </div>
+        </div>
+    </div>
+</footer>

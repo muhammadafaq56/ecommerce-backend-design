@@ -1,0 +1,292 @@
+﻿@model ECommerceApp.Models.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<style>
+    .checkout-title {
+        font-size: clamp(1.3rem, 5vw, 1.8rem);
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+        font-size: clamp(1rem, 3.5vw, 1.15rem);
+        font-weight: 600;
+        margin-bottom: 0.85rem;
+    }
+
+    .form-control, .form-label {
+        font-size: clamp(0.82rem, 2.5vw, 0.95rem);
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 0.55rem 0.75rem;
+    }
+
+    @@media (max-width: 380px) {
+        .name-col {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+        }
+    }
+
+    .summary-card {
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+        .summary-card .card-header {
+            background: #212529;
+            color: #fff;
+            padding: 0.75rem 1rem;
+        }
+
+            .summary-card .card-header h5 {
+                font-size: clamp(0.9rem, 3vw, 1rem);
+                margin: 0;
+            }
+
+        .summary-card .card-body {
+            padding: clamp(0.75rem, 3vw, 1.1rem);
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.35rem;
+        gap: 0.5rem;
+    }
+
+        .summary-item span:first-child {
+            flex: 1;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .summary-item span:last-child {
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+    #card-element {
+        padding: 12px;
+        height: 44px;
+        border-radius: 8px;
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    @@media (max-width: 767px) {
+        .checkout-summary-col {
+            order: -1;
+            margin-bottom: 1.5rem;
+        }
+    }
+</style>
+
+<h2 class="checkout-title">Checkout</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-action="PlaceOrder" method="post" id="checkout-form" novalidate>
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="SubTotal" />
+    <input type="hidden" asp-for="ShippingCost" />
+    <input type="hidden" asp-for="Tax" />
+    <input type="hidden" asp-for="Total" />
+    <input type="hidden" asp-for="ClientSecret" />
+    <input type="hidden" asp-for="PaymentIntentId" id="paymentIntentId" />
+    <input type="hidden" id="stripeConfirmed" value="false" />
+
+    <div class="row g-4">
+
+        <!-- Order Summary -->
+        <div class="col-12 col-md-5 checkout-summary-col">
+            <div class="summary-card card">
+                <div class="card-header"><h5>Order Summary</h5></div>
+                <div class="card-body">
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="summary-item">
+                            <span>@item.Product?.Name x@(item.Quantity)</span>
+                            <span>$@(item.Product!.Price * item.Quantity)</span>
+                        </div>
+                    }
+                    <hr class="my-2" />
+                    <div class="summary-item">
+                        <span>Subtotal</span><span>$@Model.SubTotal</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        <span>@(Model.ShippingCost == 0 ? "Free" : "$" + Model.ShippingCost)</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Tax (8%)</span><span>$@Model.Tax</span>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="summary-item fw-bold" style="font-size:1.05em;">
+                        <span>Total</span><span class="text-success">$@Model.Total</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping + Payment + Button -->
+        <div class="col-12 col-md-7">
+            <h5 class="section-title">Shipping Information</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-6 name-col">
+                    <label asp-for="FirstName" class="form-label"></label>
+                    <input asp-for="FirstName" class="form-control" autocomplete="given-name" required />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-6 name-col">
+                    <label asp-for="LastName" class="form-label"></label>
+                    <input asp-for="LastName" class="form-control" autocomplete="family-name" required />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="email" inputmode="email" required />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label asp-for="Phone" class="form-label"></label>
+                    <input asp-for="Phone" class="form-control" autocomplete="tel" inputmode="tel" required />
+                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" autocomplete="street-address" required />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label asp-for="City" class="form-label"></label>
+                    <input asp-for="City" class="form-control" autocomplete="address-level2" required />
+                    <span asp-validation-for="City" class="text-danger small"></span>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label asp-for="Country" class="form-label"></label>
+                    <input asp-for="Country" class="form-control" autocomplete="country-name" required />
+                    <span asp-validation-for="Country" class="text-danger small"></span>
+                </div>
+                <div class="col-6 col-sm-4">
+                    <label asp-for="PostalCode" class="form-label"></label>
+                    <input asp-for="PostalCode" class="form-control" autocomplete="postal-code" inputmode="numeric" required />
+                    <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+
+            <h5 class="section-title">Payment</h5>
+            <div class="mb-2">
+                <label class="form-label">Card Details</label>
+                <div id="card-element" class="form-control"></div>
+                <div id="card-errors" class="text-danger small mt-1"></div>
+            </div>
+
+            <!-- Place Order button at the very bottom -->
+            <div class="mt-4">
+                <button type="submit" id="submit-btn" class="btn btn-dark w-100">
+                    Place Order — $@Model.Total
+                </button>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <partial name="_ValidationScripts" />
+    <script>
+        const stripe      = Stripe('@Model.StripePublishableKey');
+        const elements    = stripe.elements();
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#212529',
+                    '::placeholder': { color: '#6c757d' }
+                }
+            }
+        });
+        cardElement.mount('#card-element');
+
+        let cardComplete = false;
+        cardElement.on('change', function (e) {
+            cardComplete = e.complete;
+            document.getElementById('card-errors').textContent =
+                e.error ? e.error.message : '';
+        });
+
+        document.getElementById('checkout-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('submit-btn');
+
+            // STEP 1: Client-side validation
+            if (!$(this).valid()) {
+                const firstError = document.querySelector('.field-validation-error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            // STEP 2: Check card is complete
+            if (!cardComplete) {
+                document.getElementById('card-errors').textContent =
+                    'Please enter your complete card details.';
+                document.getElementById('card-element').scrollIntoView({
+                    behavior: 'smooth', block: 'center'
+                });
+                return;
+            }
+
+            // STEP 3: Already confirmed? Just submit (no double charge)
+            if (document.getElementById('stripeConfirmed').value === 'true') {
+                this.submit();
+                return;
+            }
+
+            // STEP 4: Confirm card payment with Stripe
+            btn.disabled    = true;
+            btn.textContent = 'Processing...';
+
+            const clientSecret = document.getElementById('ClientSecret').value;
+            const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: { card: cardElement }
+            });
+
+            if (error) {
+                document.getElementById('card-errors').textContent = error.message;
+                btn.disabled    = false;
+                btn.textContent = 'Place Order — $@Model.Total';
+            } else if (paymentIntent.status === 'succeeded') {
+                document.getElementById('stripeConfirmed').value = 'true';
+                document.getElementById('paymentIntentId').value = paymentIntent.id;
+                btn.textContent = 'Placing Order...';
+                this.submit();
+            }
+        });
+    </script>
+}

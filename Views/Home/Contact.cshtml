@@ -1,0 +1,239 @@
+@{
+    ViewData["Title"] = "Contact Us – Afaq Mart";
+}
+
+<style>
+    .contact-wrap {
+        max-width: 680px;
+        margin: 3rem auto;
+        padding: 0 1rem;
+    }
+
+        .contact-wrap h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--am-ink);
+            margin-bottom: .5rem;
+        }
+
+        .contact-wrap .lead {
+            color: var(--am-muted);
+            margin-bottom: 2rem;
+        }
+
+    .contact-card {
+        background: #fff;
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r-lg);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .contact-info-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: .75rem 0;
+        border-bottom: 1px solid var(--am-border);
+        font-size: .92rem;
+        color: var(--am-ink);
+    }
+
+        .contact-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .contact-info-row i {
+            font-size: 1.1rem;
+            color: var(--am-accent);
+            width: 20px;
+            text-align: center;
+        }
+
+    .contact-form label {
+        font-weight: 600;
+        font-size: .88rem;
+        color: var(--am-ink);
+        margin-bottom: .35rem;
+        display: block;
+    }
+
+    .contact-form .form-control {
+        border: 1px solid var(--am-border);
+        border-radius: var(--am-r);
+        padding: .65rem 1rem;
+        font-size: .9rem;
+        width: 100%;
+        outline: none;
+        transition: border-color .2s;
+    }
+
+        .contact-form .form-control:focus {
+            border-color: var(--am-accent);
+            box-shadow: 0 0 0 3px rgba(217,119,6,.1);
+        }
+
+    .contact-form .form-group {
+        margin-bottom: 1.1rem;
+    }
+
+    .contact-form textarea.form-control {
+        resize: vertical;
+        min-height: 130px;
+    }
+
+    .btn-send {
+        background: var(--am-accent);
+        color: #fff;
+        border: none;
+        padding: .75rem 2rem;
+        border-radius: var(--am-r);
+        font-weight: 600;
+        font-size: .92rem;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-send:hover {
+            background: #b45309;
+            transform: translateY(-2px);
+        }
+
+        .btn-send:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    #contact-success {
+        display: none;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+        border-radius: var(--am-r);
+        padding: 1rem 1.25rem;
+        margin-top: 1rem;
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    #contact-error {
+        display: none;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        border-radius: var(--am-r);
+        padding: 1rem 1.25rem;
+        margin-top: 1rem;
+        font-size: .9rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="contact-wrap">
+    <h1>Contact Us</h1>
+    <p class="lead">Have a question or need help? We're here for you.</p>
+
+    <!-- Info card -->
+    <div class="contact-card">
+        <div class="contact-info-row">
+            <i class="bi bi-telephone"></i>
+            <span>+92-346-0545017</span>
+        </div>
+        <div class="contact-info-row">
+            <i class="bi bi-clock"></i>
+            <span>Monday – Saturday, 9 AM – 7 PM PKT</span>
+        </div>
+    </div>
+
+    <!-- Contact form -->
+    <div class="contact-card contact-form">
+        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;color:var(--am-ink);">Send us a message</h2>
+
+        <div class="form-group">
+            <label for="cf-name">Your Name</label>
+            <input type="text" id="cf-name" class="form-control" placeholder="Ali Ahmed" />
+        </div>
+        <div class="form-group">
+            <label for="cf-email">Email Address</label>
+            <input type="email" id="cf-email" class="form-control" placeholder="ali@example.com" />
+        </div>
+        <div class="form-group">
+            <label for="cf-subject">Subject</label>
+            <input type="text" id="cf-subject" class="form-control" placeholder="Order issue, return request…" />
+        </div>
+        <div class="form-group">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" class="form-control" placeholder="Describe your issue or question…"></textarea>
+        </div>
+
+        <button class="btn-send" id="send-btn" onclick="submitContact()">
+            <i class="bi bi-send"></i> Send Message
+        </button>
+
+        <div id="contact-success">
+            ✓ Your message has been sent! We'll get back to you within 24 hours.
+        </div>
+        <div id="contact-error">
+            ✗ Something went wrong. Please try again or email us directly.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function submitContact() {
+            const name    = document.getElementById('cf-name').value.trim();
+            const email   = document.getElementById('cf-email').value.trim();
+            const subject = document.getElementById('cf-subject').value.trim();
+            const message = document.getElementById('cf-message').value.trim();
+
+            document.getElementById('contact-success').style.display = 'none';
+            document.getElementById('contact-error').style.display   = 'none';
+
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all fields before sending.');
+                return;
+            }
+
+            const btn = document.getElementById('send-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending…';
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+                const formData = new FormData();
+                formData.append('name',    name);
+                formData.append('email',   email);
+                formData.append('subject', subject);
+                formData.append('message', message);
+                formData.append('__RequestVerificationToken', token);
+
+                const res = await fetch('/Home/SubmitContact', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    document.getElementById('contact-success').style.display = 'block';
+                    document.getElementById('cf-name').value    = '';
+                    document.getElementById('cf-email').value   = '';
+                    document.getElementById('cf-subject').value = '';
+                    document.getElementById('cf-message').value = '';
+                } else {
+                    document.getElementById('contact-error').style.display = 'block';
+                }
+            } catch {
+                document.getElementById('contact-error').style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send"></i> Send Message';
+            }
+        }
+    </script>
+    @Html.AntiForgeryToken()
+}
